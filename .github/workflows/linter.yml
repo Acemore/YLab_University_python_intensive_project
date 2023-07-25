@@ -1,0 +1,22 @@
+name: linter-check
+
+on:
+  push:
+    branches: [ main ]
+  
+  workflow_dispatch:
+
+jobs:
+  linter-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install depenpencies
+        run: |
+          pip install poetry
+          poetry install
+                
+      - name: Run lint task
+        run: make lint
