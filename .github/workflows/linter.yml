@@ -12,7 +12,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      
+
+      - name: Init venv
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          echo "PATH=$PATH" >> $GITHUB_ENV
+ 
       - name: Install depenpencies
         run: |
           pip install poetry
