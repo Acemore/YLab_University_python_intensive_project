@@ -51,10 +51,9 @@ def update_dish(
     )
 
     if db_dish:
-        dish_data = dish.dict()
-
-        for key, value in dish_data.items():
-            setattr(db_dish, key, value)
+        db_dish.title = dish.title
+        db_dish.description = dish.description
+        db_dish.price = dish.price
 
         db.commit()
         db.refresh(db_dish)

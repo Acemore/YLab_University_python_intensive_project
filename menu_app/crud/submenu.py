@@ -53,10 +53,8 @@ def update_submenu(
     )
 
     if db_submenu:
-        submenu_data = submenu.dict()
-
-        for key, value in submenu_data.items():
-            setattr(db_submenu, key, value)
+        db_submenu.title = submenu.title
+        db_submenu.description = submenu.description
 
         db.commit()
         db.refresh(db_submenu)

@@ -36,10 +36,8 @@ def update_menu(db: Session, menu_id: UUID, menu: menu_schema.MenuUpdate):
     db_menu = db.query(Menu).get(menu_id)
 
     if db_menu:
-        menu_data = menu.dict()
-
-        for key, value in menu_data.items():
-            setattr(db_menu, key, value)
+        db_menu.title = menu.title
+        db_menu.description = menu.description
 
         db.commit()
         db.refresh(db_menu)
