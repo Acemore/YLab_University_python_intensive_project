@@ -3,8 +3,6 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 
 from ..models.dish import Dish
-from ..models.menu import Menu
-from ..models.submenu import Submenu
 from ..schemas import dish as dish_schema
 
 
@@ -37,10 +35,6 @@ def create_dish(db: Session, submenu_id: UUID, dish: dish_schema.DishCreate):
     db.add(db_dish)
     db.commit()
 
-    db_dish.submenu.dishes_count += 1
-    db_dish.submenu.menu.dishes_count += 1
-
-    db.commit()
     db.refresh(db_dish)
 
     return dish_schema.Dish(**db_dish.__dict__)
@@ -80,10 +74,6 @@ def delete_dish(db: Session, submenu_id: UUID, dish_id: UUID):
 
     if db_dish:
         db.delete(db_dish)
-
-        db.query(Submenu).filter_by(id=submenu_id).first().dishes_count -= 1
-        db.query(Menu).join(Submenu).filter(
-            Submenu.id == submenu_id).first().dishes_count -= 1
 
         db.commit()
     else:
