@@ -11,6 +11,18 @@ Clone repo
 git clone git@github.com:Acemore/YLab_University_python_intensive_project.git
 ```
 
+Initialize Python virtual environment
+
+```
+python -m venv .venv
+
+# Shell
+source .venv/bin/activate
+
+# Windows
+.venv\Scripts\activate.bat
+```
+
 Create .env file in root project dir and add local var
 
 ```
@@ -20,13 +32,14 @@ SQLALCHEMY_DATABASE_URL=<your Postgres Connection URL>
 Install dependencies
 
 ```bash
-make install
+python -m pip install poetry
+poetry install
 ```
 
 Launch server with the app
 
 ```bash
-make run
+poetry run uvicorn menu_app.main:app --reload
 ```
 
 Go to address http://localhost:8000/ or http://127.0.0.1:8000/

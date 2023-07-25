@@ -25,4 +25,4 @@ jobs:
           poetry install
                 
       - name: Run lint task
-        run: make lint
+        run: poetry run flake8 menu_app
