@@ -49,3 +49,23 @@ Run tests
 ```bash
 poetry run pytest menu_app_tests/*
 ```
+
+## Docker
+
+Run app
+
+```
+docker compose up -d
+```
+
+Run tests
+
+```
+docker compose -f docker-compose-tests.yml up
+```
+
+Remove containers
+
+```
+docker compose rm -fs
+```
