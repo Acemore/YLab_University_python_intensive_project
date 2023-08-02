@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:15.1-alpine
+    environment:
+      - POSTGRES_DB=menu_app
+      - POSTGRES_USER=menu_app
+      - POSTGRES_PASSWORD=menu_app
+    
+  api:
+    depends_on:
+      db:
+        condition: service_started
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SQLALCHEMY_DATABASE_URL=postgresql://menu_app:menu_app@db:5432/menu_app
+    ports:
+      - 8000:8000
