@@ -4,7 +4,10 @@ version = "0.1.0"
 description = ""
 authors = ["Sergey Martynov <acemore@mail.ru>"]
 readme = "README.md"
-packages = [{include = "menu_app"}]
+packages = [
+  {include = "menu_app"},
+  {include = "menu_app_tests"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -13,9 +16,11 @@ uvicorn = "^0.23.1"
 sqlmodel = "^0.0.8"
 psycopg2-binary = "^2.9.6"
 python-dotenv = "^1.0.0"
+requests = "^2.31.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
+pytest = "^7.4.0"
 
 [build-system]
 requires = ["poetry-core"]
