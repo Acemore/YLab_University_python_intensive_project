@@ -3,7 +3,7 @@ name: linter-check
 on:
   push:
     branches: [ main ]
-  
+
   workflow_dispatch:
 
 jobs:
@@ -18,11 +18,11 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           echo "PATH=$PATH" >> $GITHUB_ENV
- 
+
       - name: Install depenpencies
         run: |
           pip install poetry
           poetry install
-                
+
       - name: Run lint task
         run: poetry run flake8 menu_app

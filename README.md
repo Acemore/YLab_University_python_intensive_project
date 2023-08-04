@@ -1,7 +1,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/299b5686e1ff7bdb76a8/maintainability)](https://codeclimate.com/github/Acemore/YLab_University_python_intensive_project/maintainability)
 [![linter-check](https://github.com/Acemore/YLab_University_python_intensive_project/actions/workflows/linter.yml/badge.svg?branch=main)](https://github.com/Acemore/YLab_University_python_intensive_project/actions/workflows/linter.yml)
 
-**Menu app** is web app that provides REST API CRUD operations to work with restaurant menus. 
+**Menu app** is web app that provides REST API CRUD operations to work with restaurant menus.
 
 ### To run **Menu app**
 

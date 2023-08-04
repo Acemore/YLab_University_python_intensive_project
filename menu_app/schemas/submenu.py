@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class SubmenuBase(BaseModel):
@@ -17,9 +18,9 @@ class Submenu(SubmenuBase):
     dishes_count: int
 
     class Config:
-        orm_mode: True
+        orm_mode = True
 
 
 class SubmenuUpdate(BaseModel):
-    title: str = None
+    title: str | None = None
     description: str | None = None

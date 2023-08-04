@@ -1,6 +1,7 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from uuid import UUID
 
 from ..models.submenu import Submenu
 from ..schemas import submenu as submenu_schema
@@ -18,7 +19,7 @@ def read_submenu(db: Session, menu_id: UUID, submenu_id: UUID):
     if db_submenu is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="submenu not found",
+            detail='submenu not found',
         )
 
     return submenu_schema.Submenu(**db_submenu.__dict__)
@@ -61,7 +62,7 @@ def update_submenu(
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="submenu not found",
+            detail='submenu not found',
         )
 
     return submenu_schema.Submenu(**db_submenu.__dict__)
@@ -78,7 +79,7 @@ def delete_submenu(db: Session, menu_id: UUID, submenu_id: UUID):
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="submenu not found",
+            detail='submenu not found',
         )
 
-    return {"ok": True}
+    return {'ok': True}

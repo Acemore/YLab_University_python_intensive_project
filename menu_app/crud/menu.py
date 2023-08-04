@@ -1,6 +1,7 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from uuid import UUID
 
 from ..models.menu import Menu
 from ..schemas import menu as menu_schema
@@ -16,7 +17,7 @@ def read_menu(db: Session, menu_id: UUID):
     if db_menu is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="menu not found",
+            detail='menu not found',
         )
 
     return db_menu
@@ -45,7 +46,7 @@ def update_menu(db: Session, menu_id: UUID, menu: menu_schema.MenuUpdate):
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="menu not found",
+            detail='menu not found',
         )
 
     return db_menu
@@ -60,7 +61,7 @@ def delete_menu(db: Session, menu_id: UUID):
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="menu not found",
+            detail='menu not found',
         )
 
-    return {"ok": True}
+    return {'ok': True}

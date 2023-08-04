@@ -1,6 +1,7 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from uuid import UUID
 
 from ..models.dish import Dish
 from ..schemas import dish as dish_schema
@@ -18,7 +19,7 @@ def read_dish(db: Session, submenu_id: UUID, dish_id: UUID):
     if db_dish is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="dish not found",
+            detail='dish not found',
         )
 
     return dish_schema.Dish(**db_dish.__dict__)
@@ -60,7 +61,7 @@ def update_dish(
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="dish not found",
+            detail='dish not found',
         )
 
     return dish_schema.Dish(**db_dish.__dict__)
@@ -78,7 +79,7 @@ def delete_dish(db: Session, submenu_id: UUID, dish_id: UUID):
     else:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="dish not found",
+            detail='dish not found',
         )
 
-    return {"ok": True}
+    return {'ok': True}

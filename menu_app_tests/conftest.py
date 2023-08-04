@@ -1,6 +1,4 @@
 import pytest
-
-from .file_parser import get_file_content, parse_json
 from menu_app_tests import (
     DISH_1_DATA_TO_CREATE_FILE_PATH,
     DISH_1_DATA_TO_UPDATE_FILE_PATH,
@@ -11,6 +9,8 @@ from menu_app_tests import (
     SUBMENU_DATA_TO_CREATE_FILE_PATH,
     SUBMENU_DATA_TO_UPDATE_FILE_PATH,
 )
+
+from .file_parser import get_file_content, parse_json
 
 
 @pytest.fixture(scope='package')

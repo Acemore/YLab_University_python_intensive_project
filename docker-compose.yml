@@ -5,7 +5,7 @@ services:
       - POSTGRES_DB=menu_app
       - POSTGRES_USER=menu_app
       - POSTGRES_PASSWORD=menu_app
-    
+
   api:
     depends_on:
       db:

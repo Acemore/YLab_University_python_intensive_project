@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class DishBase(BaseModel):
@@ -17,10 +18,10 @@ class Dish(DishBase):
     submenu_id: UUID
 
     class Config:
-        orm_mode: True
+        orm_mode = True
 
 
 class DishUpdate(BaseModel):
-    title: str = None
+    title: str | None = None
     description: str | None = None
-    price: str = None
+    price: str | None = None

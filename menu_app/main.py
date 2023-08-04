@@ -1,23 +1,18 @@
-from fastapi import Depends, FastAPI, status
-from sqlalchemy.orm import Session
 from uuid import UUID
 
-from .crud import (
-    dish as dish_crud,
-    menu as menu_crud,
-    submenu as submenu_crud,
-)
+from fastapi import Depends, FastAPI, status
+from sqlalchemy.orm import Session
+
+from .crud import dish as dish_crud
+from .crud import menu as menu_crud
+from .crud import submenu as submenu_crud
 from .database import SessionLocal, engine
-from .models import (
-    dish as dish_model,
-    menu as menu_model,
-    submenu as submenu_model,
-)
-from .schemas import (
-    dish as dish_schema,
-    menu as menu_schema,
-    submenu as submenu_schema,
-)
+from .models import dish as dish_model
+from .models import menu as menu_model
+from .models import submenu as submenu_model
+from .schemas import dish as dish_schema
+from .schemas import menu as menu_schema
+from .schemas import submenu as submenu_schema
 
 dish_model.Base.metadata.create_all(engine)
 menu_model.Base.metadata.create_all(engine)

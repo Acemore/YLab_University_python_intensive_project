@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class MenuBase(BaseModel):
@@ -21,5 +22,5 @@ class Menu(MenuBase):
 
 
 class MenuUpdate(BaseModel):
-    title: str = None
+    title: str | None = None
     description: str | None = None
