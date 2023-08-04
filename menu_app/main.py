@@ -10,6 +10,7 @@ from .database import SessionLocal, engine
 from .models import dish as dish_model
 from .models import menu as menu_model
 from .models import submenu as submenu_model
+from .repos.menu import MenuRepository
 from .schemas import dish as dish_schema
 from .schemas import menu as menu_schema
 from .schemas import submenu as submenu_schema
@@ -29,9 +30,12 @@ def get_db():
         db.close()
 
 
+menu_repo = MenuRepository(Depends(get_db))
+
+
 @app.get('/api/v1/menus')
 def read_menus(db: Session = Depends(get_db)):
-    return menu_crud.read_menus(db)
+    return menu_repo.read_menus(db)
 
 
 @app.get('/api/v1/menus/{menu_id}/submenus')
@@ -46,7 +50,7 @@ def read_dishes(submenu_id: UUID, db: Session = Depends(get_db)):
 
 @app.get('/api/v1/menus/{menu_id}')
 def read_menu(menu_id: UUID, db: Session = Depends(get_db)):
-    return menu_crud.read_menu(db, menu_id)
+    return menu_repo.read_menu(db, menu_id)
 
 
 @app.get('/api/v1/menus/{menu_id}/submenus/{submenu_id}')
@@ -65,7 +69,7 @@ def read_dish(submenu_id: UUID, dish_id: UUID, db: Session = Depends(get_db)):
 
 @app.post('/api/v1/menus', status_code=status.HTTP_201_CREATED)
 def create_menu(menu: menu_schema.MenuCreate, db: Session = Depends(get_db)):
-    return menu_crud.create_menu(db, menu)
+    return menu_repo.create_menu(db, menu)
 
 
 @app.post(
@@ -98,7 +102,7 @@ def update_menu(
     menu_id: UUID,
     db: Session = Depends(get_db,),
 ):
-    return menu_crud.update_menu(db, menu_id, menu)
+    return menu_repo.update_menu(db, menu_id, menu)
 
 
 @app.patch('/api/v1/menus/{menu_id}/submenus/{submenu_id}')
@@ -123,7 +127,7 @@ def update_dish(
 
 @app.delete('/api/v1/menus/{menu_id}')
 def delete_menu(menu_id: UUID, db: Session = Depends(get_db)):
-    return menu_crud.delete_menu(db, menu_id)
+    return menu_repo.delete_menu(db, menu_id)
 
 
 @app.delete('/api/v1/menus/{menu_id}/submenus/{submenu_id}')
