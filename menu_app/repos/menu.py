@@ -22,5 +22,5 @@ class MenuRepository(object):
     def update_menu(self, db: Session, menu_id: UUID, menu: menu_schema.MenuUpdate):
         return menu_crud.update_menu(db, menu_id, menu)
 
-    def delete_menu(self, db:Session, menu_id: UUID):
+    def delete_menu(self, db: Session, menu_id: UUID):
         return menu_crud.delete_menu(db, menu_id)

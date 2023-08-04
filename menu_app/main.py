@@ -4,7 +4,6 @@ from fastapi import Depends, FastAPI, status
 from sqlalchemy.orm import Session
 
 from .crud import dish as dish_crud
-from .crud import menu as menu_crud
 from .crud import submenu as submenu_crud
 from .database import SessionLocal, engine
 from .models import dish as dish_model
