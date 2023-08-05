@@ -6,12 +6,11 @@ from sqlalchemy.orm import Session
 from .crud import dish as dish_crud
 from .crud import menu as menu_crud
 from .crud import submenu as submenu_crud
-from .models.menu import Menu
 from .schemas import dish as dish_schema
 from .schemas import menu as menu_schema
 from .schemas import submenu as submenu_schema
 
-cache = dict()
+cache: dict[str, str] = dict()
 
 
 class RestaurantRepository:
