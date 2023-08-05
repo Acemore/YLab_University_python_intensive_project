@@ -1,3 +1,4 @@
+import json
 import requests
 from menu_app_tests import APP_ROOT_URL
 
@@ -27,7 +28,7 @@ def test_read_menus_list():
     menus_list_resp = requests.get(APP_ROOT_URL)
 
     assert menus_list_resp.status_code == 200
-    assert menus_list_resp.json() != []
+    assert menus_list_resp.json() != json.dumps([])
 
 
 def test_read_menu(menu_data_to_create):

@@ -1,3 +1,4 @@
+import json
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -5,6 +6,7 @@ from sqlalchemy.orm import Session
 from .crud import dish as dish_crud
 from .crud import menu as menu_crud
 from .crud import submenu as submenu_crud
+from .models.menu import Menu
 from .schemas import dish as dish_schema
 from .schemas import menu as menu_schema
 from .schemas import submenu as submenu_schema
@@ -17,7 +19,12 @@ class RestaurantRepository:
         self.db = db
 
     def read_menus(self):
-        return menu_crud.read_menus(self.db)
+        cache_key = 'menus'
+
+        if cache_key not in cache.keys():
+            cache[cache_key] = json.dumps(menu_crud.read_menus(self.db))
+
+        return json.loads(cache[cache_key])
 
     def read_submenus(self, menu_id: UUID):
         return submenu_crud.read_submenus(self.db, menu_id)
