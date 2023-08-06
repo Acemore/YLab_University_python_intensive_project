@@ -41,16 +41,14 @@ def read_menus(svc: RestaurantService = Depends(get_service)):
     return svc.read_menus()
 
 
-# TODO
 @app.get('/api/v1/menus/{menu_id}/submenus')
-def read_submenus(menu_id: UUID, repo: RestaurantRepository = Depends(get_repo)):
-    return repo.read_submenus(menu_id)
+def read_submenus(menu_id: UUID, svc: RestaurantService = Depends(get_service)):
+    return svc.read_submenus(menu_id)
 
 
-# TODO
 @app.get('/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes')
-def read_dishes(submenu_id: UUID, repo: RestaurantRepository = Depends(get_repo)):
-    return repo.read_dishes(submenu_id)
+def read_dishes(submenu_id: UUID, svc: RestaurantService = Depends(get_service)):
+    return svc.read_dishes(submenu_id)
 
 
 @app.get('/api/v1/menus/{menu_id}')
@@ -58,20 +56,18 @@ def read_menu(menu_id: UUID, svc: RestaurantService = Depends(get_service)):
     return svc.read_menu(menu_id)
 
 
-# TODO
 @app.get('/api/v1/menus/{menu_id}/submenus/{submenu_id}')
 def read_submenu(
     menu_id: UUID,
     submenu_id: UUID,
-    repo: RestaurantRepository = Depends(get_repo)
+    svc: RestaurantService = Depends(get_service),
 ):
-    return repo.read_submenu(menu_id, submenu_id)
+    return svc.read_submenu(menu_id, submenu_id)
 
 
-# TODO
 @app.get('/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}')
-def read_dish(submenu_id: UUID, dish_id: UUID, repo: RestaurantRepository = Depends(get_repo)):
-    return repo.read_dish(submenu_id, dish_id)
+def read_dish(submenu_id: UUID, dish_id: UUID, svc: RestaurantService = Depends(get_service)):
+    return svc.read_dish(submenu_id, dish_id)
 
 
 @app.post('/api/v1/menus', status_code=status.HTTP_201_CREATED)
