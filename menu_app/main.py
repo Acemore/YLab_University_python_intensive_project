@@ -8,6 +8,7 @@ from .models import dish as dish_model
 from .models import menu as menu_model
 from .models import submenu as submenu_model
 from .restaurant_repo import RestaurantRepository
+from .restaurant_service import RestaurantService
 from .schemas import dish as dish_schema
 from .schemas import menu as menu_schema
 from .schemas import submenu as submenu_schema
@@ -31,9 +32,13 @@ def get_repo(db: Session = Depends(get_db)):
     return RestaurantRepository(db)
 
 
+def get_service(repo: RestaurantRepository = Depends(get_repo)):
+    return RestaurantService(repo)
+
+
 @app.get('/api/v1/menus')
-def read_menus(repo: RestaurantRepository = Depends(get_repo)):
-    return repo.read_menus()
+def read_menus(svc: RestaurantService = Depends(get_service)):
+    return svc.read_menus()
 
 
 @app.get('/api/v1/menus/{menu_id}/submenus')
@@ -47,8 +52,8 @@ def read_dishes(submenu_id: UUID, repo: RestaurantRepository = Depends(get_repo)
 
 
 @app.get('/api/v1/menus/{menu_id}')
-def read_menu(menu_id: UUID, repo=Depends(get_repo)):
-    return repo.read_menu(menu_id)
+def read_menu(menu_id: UUID, svc: RestaurantService = Depends(get_service)):
+    return svc.read_menu(menu_id)
 
 
 @app.get('/api/v1/menus/{menu_id}/submenus/{submenu_id}')

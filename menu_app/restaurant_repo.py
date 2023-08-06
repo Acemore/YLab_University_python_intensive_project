@@ -1,4 +1,3 @@
-import json
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -10,20 +9,17 @@ from .schemas import dish as dish_schema
 from .schemas import menu as menu_schema
 from .schemas import submenu as submenu_schema
 
-cache: dict[str, str] = dict()
 
-
+# Используется общий репозиторий на все сущности,
+# потому что они образуют общий агрегат:
+#  - https://stackoverflow.com/a/2330912
+#  - https://martinfowler.com/bliki/DDD_Aggregate.html
 class RestaurantRepository:
     def __init__(self, db: Session):
         self.db = db
 
     def read_menus(self):
-        cache_key = 'menus'
-
-        if cache_key not in cache.keys():
-            cache[cache_key] = json.dumps(menu_crud.read_menus(self.db))
-
-        return json.loads(cache[cache_key])
+        return menu_crud.read_menus(self.db)
 
     def read_submenus(self, menu_id: UUID):
         return submenu_crud.read_submenus(self.db, menu_id)
