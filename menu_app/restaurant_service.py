@@ -1,8 +1,10 @@
 import json
+import os
 from uuid import UUID
 
 from pydantic import parse_obj_as
 from pydantic.json import pydantic_encoder
+from redis import Redis
 
 from .restaurant_repo import RestaurantRepository
 from .schemas.dish import Dish as DishShema
@@ -12,7 +14,8 @@ from .schemas.menu import MenuCreate, MenuUpdate
 from .schemas.submenu import Submenu as SubmenuSchema
 from .schemas.submenu import SubmenuCreate, SubmenuUpdate
 
-cache = dict()
+REDIS_HOST: str = str(os.getenv('REDIS_HOST'))
+cache: Redis = Redis(host=REDIS_HOST, port=6379, db=0)
 
 
 def cached_read(key, schema_class, model_loader):
@@ -64,23 +67,23 @@ class RestaurantService:
         return cached_read(cache_key, DishShema, lambda: self.repo.read_dish(submenu_id, dish_id))
 
     def create_menu(self, menu: MenuCreate):
-        cache.clear()
+        cache.flushdb()
         return self.repo.create_menu(menu)
 
     def update_menu(self, menu_id: UUID, menu: MenuUpdate):
-        cache.clear()
+        cache.flushdb()
         return self.repo.update_menu(menu_id, menu)
 
     def delete_menu(self, menu_id: UUID):
-        cache.clear()
+        cache.flushdb()
         return self.repo.delete_menu(menu_id)
 
     def create_submenu(self, menu_id: UUID, submenu: SubmenuCreate):
-        cache.clear()
+        cache.flushdb()
         return self.repo.create_submenu(menu_id, submenu)
 
     def create_dish(self, submenu_id: UUID, dish: DishCreate):
-        cache.clear()
+        cache.flushdb()
         return self.repo.create_dish(submenu_id, dish)
 
     def update_submenu(
@@ -89,7 +92,7 @@ class RestaurantService:
         submenu_id: UUID,
         submenu: SubmenuUpdate,
     ):
-        cache.clear()
+        cache.flushdb()
         return self.repo.update_submenu(menu_id, submenu_id, submenu)
 
     def update_dish(
@@ -98,13 +101,13 @@ class RestaurantService:
         dish_id: UUID,
         dish: DishUpdate,
     ):
-        cache.clear()
+        cache.flushdb()
         return self.repo.update_dish(submenu_id, dish_id, dish)
 
     def delete_submenu(self, menu_id: UUID, submenu_id: UUID):
-        cache.clear()
+        cache.flushdb()
         return self.repo.delete_submenu(menu_id, submenu_id)
 
     def delete_dish(self, submenu_id: UUID, dish_id: UUID):
-        cache.clear()
+        cache.flushdb()
         return self.repo.delete_dish(submenu_id, dish_id)
