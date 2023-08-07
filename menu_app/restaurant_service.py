@@ -6,6 +6,7 @@ from pydantic import parse_obj_as
 from pydantic.json import pydantic_encoder
 from redis import Redis
 
+from .models.menu import Menu
 from .restaurant_repo import RestaurantRepository
 from .schemas.dish import Dish as DishShema
 from .schemas.dish import DishCreate, DishUpdate
@@ -73,11 +74,19 @@ class RestaurantService:
 
     def create_menu(self, menu: MenuCreate):
         cache_clear()
-        return self.repo.create_menu(menu)
 
-    def update_menu(self, menu_id: UUID, menu: MenuUpdate):
+        menu_model = Menu(title=menu.title, description=menu.description)
+
+        return self.repo.save_menu(menu_model, True)
+
+    def update_menu(self, menu_id: UUID, menu_update: MenuUpdate):
         cache_clear()
-        return self.repo.update_menu(menu_id, menu)
+
+        menu_model = self.repo.read_menu(menu_id)
+        menu_model.title = menu_update.title
+        menu_model.description = menu_update.description
+
+        return self.repo.save_menu(menu_model, False)
 
     def delete_menu(self, menu_id: UUID):
         cache_clear()
