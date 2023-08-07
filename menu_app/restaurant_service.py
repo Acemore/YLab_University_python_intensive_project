@@ -7,6 +7,7 @@ from pydantic.json import pydantic_encoder
 from redis import Redis
 
 from .models.menu import Menu
+from .models.submenu import Submenu
 from .restaurant_repo import RestaurantRepository
 from .schemas.dish import Dish as DishShema
 from .schemas.dish import DishCreate, DishUpdate
@@ -94,7 +95,14 @@ class RestaurantService:
 
     def create_submenu(self, menu_id: UUID, submenu: SubmenuCreate):
         cache_clear()
-        return self.repo.create_submenu(menu_id, submenu)
+
+        submenu_model = Submenu(
+            menu_id=menu_id,
+            title=submenu.title,
+            description=submenu.description,
+        )
+
+        return self.repo.save_submenu(submenu_model, True)
 
     def create_dish(self, submenu_id: UUID, dish: DishCreate):
         cache_clear()
@@ -104,10 +112,16 @@ class RestaurantService:
         self,
         menu_id: UUID,
         submenu_id: UUID,
-        submenu: SubmenuUpdate,
+        submenu_update: SubmenuUpdate,
     ):
         cache_clear()
-        return self.repo.update_submenu(menu_id, submenu_id, submenu)
+
+        submenu_model = self.repo.read_submenu(menu_id, submenu_id)
+
+        submenu_model.title = submenu_update.title
+        submenu_model.description = submenu_update.description
+
+        return self.repo.save_submenu(submenu_model, False)
 
     def update_dish(
         self,

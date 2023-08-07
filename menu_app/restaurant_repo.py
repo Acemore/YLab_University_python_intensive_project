@@ -4,10 +4,9 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from .crud import dish as dish_crud
-from .crud import submenu as submenu_crud
 from .models.menu import Menu
+from .models.submenu import Submenu
 from .schemas import dish as dish_schema
-from .schemas import submenu as submenu_schema
 
 
 # Используется общий репозиторий на все сущности,
@@ -60,24 +59,45 @@ class RestaurantRepository:
     # Submenu
 
     def read_submenus(self, menu_id: UUID):
-        return submenu_crud.read_submenus(self.db, menu_id)
+        return self.db.query(Submenu).filter_by(menu_id=menu_id).all()
 
     def read_submenu(self, menu_id: UUID, submenu_id: UUID):
-        return submenu_crud.read_submenu(self.db, menu_id, submenu_id)
+        submenu = (
+            self.db.query(Submenu).filter_by(menu_id=menu_id, id=submenu_id).first()
+        )
 
-    def create_submenu(self, menu_id: UUID, submenu: submenu_schema.SubmenuCreate):
-        return submenu_crud.create_submenu(self.db, menu_id, submenu)
+        if submenu is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='submenu not found',
+            )
 
-    def update_submenu(
-        self,
-        menu_id: UUID,
-        submenu_id: UUID,
-        submenu: submenu_schema.SubmenuUpdate,
-    ):
-        return submenu_crud.update_submenu(self.db, menu_id, submenu_id, submenu)
+        return submenu
+
+    def save_submenu(self, submenu: Submenu, is_new: bool):
+        if is_new:
+            self.db.add(submenu)
+
+        self.db.commit()
+        self.db.refresh(submenu)
+
+        return submenu
 
     def delete_submenu(self, menu_id: UUID, submenu_id: UUID):
-        return submenu_crud.delete_submenu(self.db, menu_id, submenu_id)
+        submenu = (
+            self.db.query(Submenu).filter_by(menu_id=menu_id, id=submenu_id).first()
+        )
+
+        if not submenu:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='submenu not found',
+            )
+
+        self.db.delete(submenu)
+        self.db.commit()
+
+        return {'ok': True}
 
     # Dish
 
