@@ -18,10 +18,10 @@ class Dish(DishBase):
     submenu_id: UUID
 
     class Config:
-        orm_mode = True
+        orm_mode: bool = True
 
 
 class DishUpdate(BaseModel):
-    title: str | None = None
+    title: str
     description: str | None = None
     price: str | None = None

@@ -7,7 +7,7 @@ menu_id = None
 submenu_id = None
 
 
-def test_create_menu(menu_data_to_create):
+def test_create_menu(menu_data_to_create) -> None:
     created_menu_resp = requests.post(APP_ROOT_URL, json=menu_data_to_create)
     created_menu = created_menu_resp.json()
 
@@ -19,7 +19,7 @@ def test_create_menu(menu_data_to_create):
     assert created_menu['description'] == menu_data_to_create['description']
 
 
-def test_create_submenu(submenu_data_to_create):
+def test_create_submenu(submenu_data_to_create) -> None:
     created_submenu_resp = requests.post(
         f'{APP_ROOT_URL}/{menu_id}/submenus',
         json=submenu_data_to_create,
@@ -34,7 +34,7 @@ def test_create_submenu(submenu_data_to_create):
     assert created_submenu['description'] == submenu_data_to_create['description']
 
 
-def test_create_dish_1(dish_1_data_to_create):
+def test_create_dish_1(dish_1_data_to_create) -> None:
     created_dish_1_resp = requests.post(
         f'{APP_ROOT_URL}/{menu_id}/submenus/{submenu_id}/dishes',
         json=dish_1_data_to_create,
@@ -50,7 +50,7 @@ def test_create_dish_1(dish_1_data_to_create):
     assert created_dish_1['price'] == str(dish_1_data_to_create['price'])
 
 
-def test_create_dish_2(dish_2_data_to_create):
+def test_create_dish_2(dish_2_data_to_create) -> None:
     created_dish_2_resp = requests.post(
         f'{APP_ROOT_URL}/{menu_id}/submenus/{submenu_id}/dishes',
         json=dish_2_data_to_create,
@@ -68,7 +68,7 @@ def test_create_dish_2(dish_2_data_to_create):
     assert created_dish_2['price'] == str(dish_2_data_to_create['price'])
 
 
-def test_read_menu(menu_data_to_create):
+def test_read_menu(menu_data_to_create) -> None:
     menu_resp = requests.get(f'{APP_ROOT_URL}/{menu_id}')
     menu = menu_resp.json()
 
@@ -80,7 +80,7 @@ def test_read_menu(menu_data_to_create):
     assert menu['dishes_count'] == 2
 
 
-def test_read_submenu(submenu_data_to_create):
+def test_read_submenu(submenu_data_to_create) -> None:
     submenu_resp = requests.get(
         f'{APP_ROOT_URL}/{menu_id}/submenus/{submenu_id}'
     )
@@ -93,21 +93,21 @@ def test_read_submenu(submenu_data_to_create):
     assert submenu['dishes_count'] == 2
 
 
-def test_delete_submenu():
+def test_delete_submenu() -> None:
     resp = requests.delete(f'{APP_ROOT_URL}/{menu_id}/submenus/{submenu_id}')
 
     assert resp.status_code == 200
     assert resp.json() == {'ok': True}
 
 
-def test_read_submenus_list_after_deleting():
+def test_read_submenus_list_after_deleting() -> None:
     submenus_list_resp = requests.get(f'{APP_ROOT_URL}/{menu_id}/submenus')
 
     assert submenus_list_resp.status_code == 200
     assert submenus_list_resp.json() == []
 
 
-def test_read_dishes_list_after_deleting():
+def test_read_dishes_list_after_deleting() -> None:
     dishes_list_resp = requests.get(
         f'{APP_ROOT_URL}/{menu_id}/submenus/{submenu_id}/dishes'
     )
@@ -116,7 +116,7 @@ def test_read_dishes_list_after_deleting():
     assert dishes_list_resp.json() == []
 
 
-def test_read_updated_menu(menu_data_to_create):
+def test_read_updated_menu(menu_data_to_create) -> None:
     menu_resp = requests.get(f'{APP_ROOT_URL}/{menu_id}')
     menu = menu_resp.json()
 
@@ -128,14 +128,14 @@ def test_read_updated_menu(menu_data_to_create):
     assert menu['dishes_count'] == 0
 
 
-def test_delete_menu():
+def test_delete_menu() -> None:
     resp = requests.delete(f'{APP_ROOT_URL}/{menu_id}')
 
     assert resp.status_code == 200
     assert resp.json() == {'ok': True}
 
 
-def test_read_menus_list_after_deleting():
+def test_read_menus_list_after_deleting() -> None:
     menus_list_resp = requests.get(APP_ROOT_URL)
 
     assert menus_list_resp.status_code == 200

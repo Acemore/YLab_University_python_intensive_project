@@ -6,14 +6,14 @@ from menu_app_tests import APP_ROOT_URL
 menu_id = None
 
 
-def test_read_empty_menus_list():
+def test_read_empty_menus_list() -> None:
     empty_menus_list_resp = requests.get(APP_ROOT_URL)
 
     assert empty_menus_list_resp.status_code == 200
     assert empty_menus_list_resp.json() == []
 
 
-def test_create_menu(menu_data_to_create):
+def test_create_menu(menu_data_to_create) -> None:
     created_menu_resp = requests.post(APP_ROOT_URL, json=menu_data_to_create)
     created_menu = created_menu_resp.json()
 
@@ -25,14 +25,14 @@ def test_create_menu(menu_data_to_create):
     assert created_menu['description'] == menu_data_to_create['description']
 
 
-def test_read_menus_list():
+def test_read_menus_list() -> None:
     menus_list_resp = requests.get(APP_ROOT_URL)
 
     assert menus_list_resp.status_code == 200
     assert menus_list_resp.json() != json.dumps([])
 
 
-def test_read_menu(menu_data_to_create):
+def test_read_menu(menu_data_to_create) -> None:
     menu_resp = requests.get(f'{APP_ROOT_URL}/{menu_id}')
     menu = menu_resp.json()
 
@@ -42,7 +42,7 @@ def test_read_menu(menu_data_to_create):
     assert menu['description'] == menu_data_to_create['description']
 
 
-def test_update_menu(menu_data_to_update):
+def test_update_menu(menu_data_to_update) -> None:
     not_updated_menu_resp = requests.get(f'{APP_ROOT_URL}/{menu_id}')
     not_updated_menu = not_updated_menu_resp.json()
 
@@ -62,7 +62,7 @@ def test_update_menu(menu_data_to_update):
     assert updated_menu['description'] == menu_data_to_update['description']
 
 
-def test_read_updated_menu(menu_data_to_update):
+def test_read_updated_menu(menu_data_to_update) -> None:
     retrieved_updated_menu_resp = requests.get(f'{APP_ROOT_URL}/{menu_id}')
     retrieved_updated_menu = retrieved_updated_menu_resp.json()
 
@@ -72,21 +72,21 @@ def test_read_updated_menu(menu_data_to_update):
     assert retrieved_updated_menu['description'] == menu_data_to_update['description']
 
 
-def test_delete_menu():
+def test_delete_menu() -> None:
     resp = requests.delete(f'{APP_ROOT_URL}/{menu_id}')
 
     assert resp.status_code == 200
     assert resp.json() == {'ok': True}
 
 
-def test_read_menus_list_after_deleting():
+def test_read_menus_list_after_deleting() -> None:
     menus_list_resp = requests.get(APP_ROOT_URL)
 
     assert menus_list_resp.status_code == 200
     assert menus_list_resp.json() == []
 
 
-def test_read_deleted_menu():
+def test_read_deleted_menu() -> None:
     resp = requests.get(f'{APP_ROOT_URL}/{menu_id}')
 
     assert resp.status_code == 404

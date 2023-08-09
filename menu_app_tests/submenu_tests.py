@@ -5,7 +5,7 @@ menu_id = None
 submenu_id = None
 
 
-def test_create_menu(menu_data_to_create):
+def test_create_menu(menu_data_to_create) -> None:
     created_menu_resp = requests.post(APP_ROOT_URL, json=menu_data_to_create)
     created_menu = created_menu_resp.json()
 
@@ -17,14 +17,14 @@ def test_create_menu(menu_data_to_create):
     assert created_menu['description'] == menu_data_to_create['description']
 
 
-def test_read_empty_submenus_list():
+def test_read_empty_submenus_list() -> None:
     empty_submenus_list_resp = requests.get(f'{APP_ROOT_URL}/{menu_id}/submenus')
 
     assert empty_submenus_list_resp.status_code == 200
     assert empty_submenus_list_resp.json() == []
 
 
-def test_create_submenu(submenu_data_to_create):
+def test_create_submenu(submenu_data_to_create) -> None:
     created_submenu_resp = requests.post(
         f'{APP_ROOT_URL}/{menu_id}/submenus',
         json=submenu_data_to_create,
@@ -39,14 +39,14 @@ def test_create_submenu(submenu_data_to_create):
     assert created_submenu['description'] == submenu_data_to_create['description']
 
 
-def test_read_submenus_list():
+def test_read_submenus_list() -> None:
     submenus_list_resp = requests.get(f'{APP_ROOT_URL}/{menu_id}/submenus')
 
     assert submenus_list_resp.status_code == 200
     assert submenus_list_resp.json() != []
 
 
-def test_read_submenu(submenu_data_to_create):
+def test_read_submenu(submenu_data_to_create) -> None:
     submenu_resp = requests.get(
         f'{APP_ROOT_URL}/{menu_id}/submenus/{submenu_id}'
     )
@@ -58,7 +58,7 @@ def test_read_submenu(submenu_data_to_create):
     assert submenu['description'] == submenu_data_to_create['description']
 
 
-def test_update_submenu(submenu_data_to_update):
+def test_update_submenu(submenu_data_to_update) -> None:
     not_updated_submenu_resp = requests.get(
         f'{APP_ROOT_URL}/{menu_id}/submenus/{submenu_id}'
     )
@@ -80,7 +80,7 @@ def test_update_submenu(submenu_data_to_update):
     assert updated_submenu['description'] == submenu_data_to_update['description']
 
 
-def test_read_updated_menu(submenu_data_to_update):
+def test_read_updated_menu(submenu_data_to_update) -> None:
     retrieved_updated_submenu_resp = requests.get(
         f'{APP_ROOT_URL}/{menu_id}/submenus/{submenu_id}'
     )
@@ -96,35 +96,35 @@ def test_read_updated_menu(submenu_data_to_update):
     )
 
 
-def test_delete_submenu():
+def test_delete_submenu() -> None:
     resp = requests.delete(f'{APP_ROOT_URL}/{menu_id}/submenus/{submenu_id}')
 
     assert resp.status_code == 200
     assert resp.json() == {'ok': True}
 
 
-def test_read_submenus_list_after_deleting():
+def test_read_submenus_list_after_deleting() -> None:
     submenus_list_resp = requests.get(f'{APP_ROOT_URL}/{menu_id}/submenus/')
 
     assert submenus_list_resp.status_code == 200
     assert submenus_list_resp.json() == []
 
 
-def test_read_deleted_submenu():
+def test_read_deleted_submenu() -> None:
     resp = requests.get(f'{APP_ROOT_URL}/{menu_id}/submenus/{submenu_id}')
 
     assert resp.status_code == 404
     assert resp.json()['detail'] == 'submenu not found'
 
 
-def test_delete_menu():
+def test_delete_menu() -> None:
     resp = requests.delete(f'{APP_ROOT_URL}/{menu_id}')
 
     assert resp.status_code == 200
     assert resp.json() == {'ok': True}
 
 
-def test_read_menus_list_after_deleting():
+def test_read_menus_list_after_deleting() -> None:
     menus_list_resp = requests.get(APP_ROOT_URL)
 
     assert menus_list_resp.status_code == 200

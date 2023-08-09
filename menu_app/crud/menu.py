@@ -4,14 +4,15 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..models.menu import Menu
-from ..schemas import menu as menu_schema
+from ..schemas.menu import Menu as MenuSchema
+from ..schemas.menu import MenuCreate, MenuUpdate
 
 
-def read_menus(db: Session):
+def read_menus(db: Session) -> list[MenuSchema]:
     return db.query(Menu).all()
 
 
-def read_menu(db: Session, menu_id: UUID):
+def read_menu(db: Session, menu_id: UUID) -> MenuSchema:
     db_menu = db.query(Menu).get(menu_id)
 
     if db_menu is None:
@@ -23,7 +24,7 @@ def read_menu(db: Session, menu_id: UUID):
     return db_menu
 
 
-def create_menu(db: Session, menu: menu_schema.MenuCreate):
+def create_menu(db: Session, menu: MenuCreate) -> MenuSchema:
     db_menu = Menu(title=menu.title, description=menu.description)
 
     db.add(db_menu)
@@ -33,7 +34,7 @@ def create_menu(db: Session, menu: menu_schema.MenuCreate):
     return db_menu
 
 
-def update_menu(db: Session, menu_id: UUID, menu: menu_schema.MenuUpdate):
+def update_menu(db: Session, menu_id: UUID, menu: MenuUpdate) -> MenuSchema:
     db_menu = db.query(Menu).get(menu_id)
 
     if db_menu:
@@ -52,7 +53,7 @@ def update_menu(db: Session, menu_id: UUID, menu: menu_schema.MenuUpdate):
     return db_menu
 
 
-def delete_menu(db: Session, menu_id: UUID):
+def delete_menu(db: Session, menu_id: UUID) -> dict[str, bool]:
     db_menu = db.query(Menu).get(menu_id)
 
     if db_menu:

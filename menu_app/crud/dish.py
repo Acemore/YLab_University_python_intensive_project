@@ -4,14 +4,15 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..models.dish import Dish
-from ..schemas import dish as dish_schema
+from ..schemas.dish import Dish as DishSchema
+from ..schemas.dish import DishCreate, DishUpdate
 
 
-def read_dishes(db: Session, submenu_id: UUID):
+def read_dishes(db: Session, submenu_id: UUID) -> list[DishSchema]:
     return db.query(Dish).filter_by(submenu_id=submenu_id).all()
 
 
-def read_dish(db: Session, submenu_id: UUID, dish_id: UUID):
+def read_dish(db: Session, submenu_id: UUID, dish_id: UUID) -> DishSchema:
     db_dish = (
         db.query(Dish).filter_by(submenu_id=submenu_id, id=dish_id).first()
     )
@@ -22,10 +23,10 @@ def read_dish(db: Session, submenu_id: UUID, dish_id: UUID):
             detail='dish not found',
         )
 
-    return dish_schema.Dish(**db_dish.__dict__)
+    return DishSchema(**db_dish.__dict__)
 
 
-def create_dish(db: Session, submenu_id: UUID, dish: dish_schema.DishCreate):
+def create_dish(db: Session, submenu_id: UUID, dish: DishCreate) -> DishSchema:
     db_dish = Dish(
         submenu_id=submenu_id,
         title=dish.title,
@@ -38,15 +39,15 @@ def create_dish(db: Session, submenu_id: UUID, dish: dish_schema.DishCreate):
 
     db.refresh(db_dish)
 
-    return dish_schema.Dish(**db_dish.__dict__)
+    return DishSchema(**db_dish.__dict__)
 
 
 def update_dish(
     db: Session,
     submenu_id: UUID,
     dish_id: UUID,
-    dish: dish_schema.DishUpdate,
-):
+    dish: DishUpdate,
+) -> DishSchema:
     db_dish = (
         db.query(Dish).filter_by(submenu_id=submenu_id, id=dish_id).first()
     )
@@ -64,10 +65,10 @@ def update_dish(
             detail='dish not found',
         )
 
-    return dish_schema.Dish(**db_dish.__dict__)
+    return DishSchema(**db_dish.__dict__)
 
 
-def delete_dish(db: Session, submenu_id: UUID, dish_id: UUID):
+def delete_dish(db: Session, submenu_id: UUID, dish_id: UUID) -> dict[str, bool]:
     db_dish = (
         db.query(Dish).filter_by(submenu_id=submenu_id, id=dish_id).first()
     )

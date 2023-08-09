@@ -18,9 +18,9 @@ class Menu(MenuBase):
     dishes_count: int
 
     class Config:
-        orm_mode = True
+        orm_mode: bool = True
 
 
 class MenuUpdate(BaseModel):
-    title: str | None = None
+    title: str
     description: str | None = None
