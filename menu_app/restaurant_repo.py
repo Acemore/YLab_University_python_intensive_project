@@ -3,28 +3,31 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+# Этот файл работает только с моделями
+# Не импортируй схемы сюда
 from .crud import dish as dish_crud
 from .models.menu import Menu
 from .models.submenu import Submenu
 from .schemas import dish as dish_schema
-from .schemas import menu as menu_schema
-from .schemas import submenu as submenu_schema
 
+# TODO: вынести HTTPExceptions в сервис
 
 # Используется общий репозиторий на все сущности,
 # потому что они образуют общий агрегат:
 #  - https://stackoverflow.com/a/2330912
 #  - https://martinfowler.com/bliki/DDD_Aggregate.html
+
+
 class RestaurantRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
     # Menu
 
-    def read_menus(self) -> list[menu_schema.Menu]:
+    def read_menus(self) -> list[Menu]:
         return self.db.query(Menu).all()
 
-    def read_menu(self, menu_id: UUID) -> menu_schema.Menu:
+    def read_menu(self, menu_id: UUID) -> Menu:
         menu = self.db.query(Menu).get(menu_id)
 
         if menu is None:
@@ -35,7 +38,7 @@ class RestaurantRepository:
 
         return menu
 
-    def save_menu(self, menu: Menu, is_new: bool) -> menu_schema.Menu:
+    def save_menu(self, menu: Menu, is_new: bool) -> Menu:
         if is_new:
             self.db.add(menu)
 
@@ -60,10 +63,10 @@ class RestaurantRepository:
 
     # Submenu
 
-    def read_submenus(self, menu_id: UUID) -> list[submenu_schema.Submenu]:
+    def read_submenus(self, menu_id: UUID) -> list[Submenu]:
         return self.db.query(Submenu).filter_by(menu_id=menu_id).all()
 
-    def read_submenu(self, menu_id: UUID, submenu_id: UUID) -> submenu_schema.Submenu:
+    def read_submenu(self, menu_id: UUID, submenu_id: UUID) -> Submenu:
         submenu = (
             self.db.query(Submenu).filter_by(menu_id=menu_id, id=submenu_id).first()
         )
@@ -76,7 +79,7 @@ class RestaurantRepository:
 
         return submenu
 
-    def save_submenu(self, submenu: Submenu, is_new: bool) -> submenu_schema.Submenu:
+    def save_submenu(self, submenu: Submenu, is_new: bool) -> Submenu:
         if is_new:
             self.db.add(submenu)
 

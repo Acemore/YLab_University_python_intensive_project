@@ -1,5 +1,7 @@
 from uuid import UUID
 
+from pydantic import parse_obj_as
+
 from .models.menu import Menu
 from .models.submenu import Submenu
 from .redis_cache import RedisCache
@@ -52,8 +54,9 @@ class RestaurantService:
         invalidate_menu_list()
 
         menu_model = Menu(title=menu.title, description=menu.description)
+        menu_model = self.repo.save_menu(menu_model, True)
 
-        return self.repo.save_menu(menu_model, True)
+        return parse_obj_as(MenuSchema, menu_model)
 
     def update_menu(self, menu_id: UUID, menu_update: MenuUpdate) -> MenuSchema:
         invalidate_menu_item(menu_id)
@@ -61,8 +64,9 @@ class RestaurantService:
         menu_model = self.repo.read_menu(menu_id)
         menu_model.title = menu_update.title
         menu_model.description = menu_update.description
+        menu_model = self.repo.save_menu(menu_model, False)
 
-        return self.repo.save_menu(menu_model, False)
+        return parse_obj_as(MenuSchema, menu_model)
 
     def delete_menu(self, menu_id: UUID) -> dict[str, bool]:
         invalidate_menu_item(menu_id)
@@ -76,8 +80,9 @@ class RestaurantService:
             title=submenu.title,
             description=submenu.description,
         )
+        submenu_model = self.repo.save_submenu(submenu_model, True)
 
-        return self.repo.save_submenu(submenu_model, True)
+        return parse_obj_as(SubmenuSchema, submenu_model)
 
     def create_dish(self, menu_id: UUID, submenu_id: UUID, dish: DishCreate) -> DishSchema:
         invalidate_dish_list(menu_id, submenu_id)
@@ -92,11 +97,11 @@ class RestaurantService:
         invalidate_submenu_item(menu_id, submenu_id)
 
         submenu_model = self.repo.read_submenu(menu_id, submenu_id)
-
         submenu_model.title = submenu_update.title
         submenu_model.description = submenu_update.description
+        submenu_model = self.repo.save_submenu(submenu_model, False)
 
-        return self.repo.save_submenu(submenu_model, False)
+        return parse_obj_as(SubmenuSchema, submenu_model)
 
     def update_dish(
         self,
