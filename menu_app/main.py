@@ -92,40 +92,42 @@ def create_submenu(
     status_code=status.HTTP_201_CREATED,
 )
 def create_dish(
-    dish: dish_schema.DishCreate,
+    menu_id: UUID,
     submenu_id: UUID,
+    dish: dish_schema.DishCreate,
     svc: RestaurantService = Depends(get_service),
 ) -> dish_schema.Dish:
-    return svc.create_dish(submenu_id, dish)
+    return svc.create_dish(menu_id, submenu_id, dish)
 
 
 @app.patch('/api/v1/menus/{menu_id}')
 def update_menu(
-    menu: menu_schema.MenuUpdate,
     menu_id: UUID,
+    menu_update: menu_schema.MenuUpdate,
     svc: RestaurantService = Depends(get_service),
 ) -> menu_schema.Menu:
-    return svc.update_menu(menu_id, menu)
+    return svc.update_menu(menu_id, menu_update)
 
 
 @app.patch('/api/v1/menus/{menu_id}/submenus/{submenu_id}')
 def update_submenu(
-    submenu: submenu_schema.SubmenuUpdate,
     menu_id: UUID,
     submenu_id: UUID,
+    submenu_update: submenu_schema.SubmenuUpdate,
     svc: RestaurantService = Depends(get_service),
 ) -> submenu_schema.Submenu:
-    return svc.update_submenu(menu_id, submenu_id, submenu)
+    return svc.update_submenu(menu_id, submenu_id, submenu_update)
 
 
 @app.patch('/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}')
 def update_dish(
-    dish: dish_schema.DishUpdate,
+    menu_id: UUID,
     submenu_id: UUID,
     dish_id: UUID,
+    dish_update: dish_schema.DishUpdate,
     svc: RestaurantService = Depends(get_service),
 ) -> dish_schema.Dish:
-    return svc.update_dish(submenu_id, dish_id, dish)
+    return svc.update_dish(menu_id, submenu_id, dish_id, dish_update)
 
 
 @app.delete('/api/v1/menus/{menu_id}')
@@ -140,8 +142,9 @@ def delete_submenu(menu_id: UUID, submenu_id: UUID, svc: RestaurantService = Dep
 
 @app.delete('/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}')
 def delete_dish(
+    menu_id: UUID,
     submenu_id: UUID,
     dish_id: UUID,
     svc: RestaurantService = Depends(get_service),
 ) -> dict[str, bool]:
-    return svc.delete_dish(submenu_id, dish_id)
+    return svc.delete_dish(menu_id, submenu_id, dish_id)
