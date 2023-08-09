@@ -47,8 +47,8 @@ def read_submenus(menu_id: UUID, svc: RestaurantService = Depends(get_service)) 
 
 
 @app.get('/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes')
-def read_dishes(submenu_id: UUID, svc: RestaurantService = Depends(get_service)) -> list[dish_schema.Dish]:
-    return svc.read_dishes(submenu_id)
+def read_dishes(menu_id: UUID, submenu_id: UUID, svc: RestaurantService = Depends(get_service)) -> list[dish_schema.Dish]:
+    return svc.read_dishes(menu_id, submenu_id)
 
 
 @app.get('/api/v1/menus/{menu_id}')
@@ -66,8 +66,8 @@ def read_submenu(
 
 
 @app.get('/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}')
-def read_dish(submenu_id: UUID, dish_id: UUID, svc: RestaurantService = Depends(get_service)) -> dish_schema.Dish:
-    return svc.read_dish(submenu_id, dish_id)
+def read_dish(menu_id: UUID, submenu_id: UUID, dish_id: UUID, svc: RestaurantService = Depends(get_service)) -> dish_schema.Dish:
+    return svc.read_dish(menu_id, submenu_id, dish_id)
 
 
 @app.post('/api/v1/menus', status_code=status.HTTP_201_CREATED)

@@ -23,15 +23,15 @@ class RestaurantService:
         return RedisCache.read(cache_key, list[MenuSchema], lambda: self.repo.read_menus())
 
     def read_submenus(self, menu_id: UUID) -> list[SubmenuSchema]:
-        cache_key = get_submenu_list_key()
+        cache_key = get_submenu_list_key(menu_id)
         return RedisCache.read(
             cache_key,
             list[SubmenuSchema],
             lambda: self.repo.read_submenus(menu_id),
         )
 
-    def read_dishes(self, submenu_id: UUID) -> list[DishSchema]:
-        cache_key = get_dish_list_key()
+    def read_dishes(self, menu_id: UUID, submenu_id: UUID) -> list[DishSchema]:
+        cache_key = get_dish_list_key(menu_id, submenu_id)
         return RedisCache.read(cache_key, list[DishSchema], lambda: self.repo.read_dishes(submenu_id))
 
     def read_menu(self, menu_id: UUID) -> MenuSchema:
@@ -39,15 +39,15 @@ class RestaurantService:
         return RedisCache.read(cache_key, MenuSchema, lambda: self.repo.read_menu(menu_id))
 
     def read_submenu(self, menu_id: UUID, submenu_id: UUID) -> SubmenuSchema:
-        cache_key = get_submenu_item_key(submenu_id)
+        cache_key = get_submenu_item_key(menu_id, submenu_id)
         return RedisCache.read(
             cache_key,
             SubmenuSchema,
             lambda: self.repo.read_submenu(menu_id, submenu_id),
         )
 
-    def read_dish(self, submenu_id: UUID, dish_id: UUID) -> DishSchema:
-        cache_key = get_dish_item_key(dish_id)
+    def read_dish(self, menu_id: UUID, submenu_id: UUID, dish_id: UUID) -> DishSchema:
+        cache_key = get_dish_item_key(menu_id, submenu_id, dish_id)
         return RedisCache.read(cache_key, DishSchema, lambda: self.repo.read_dish(submenu_id, dish_id))
 
     def create_menu(self, menu: MenuCreate) -> MenuSchema:
@@ -127,23 +127,23 @@ def get_menu_list_key() -> str:
 
 
 def get_menu_item_key(menu_id: UUID) -> str:
-    return f'menus/{menu_id}'
+    return f'{get_menu_list_key()}/{menu_id}'
 
 
-def get_submenu_list_key() -> str:
-    return 'submenus'
+def get_submenu_list_key(menu_id: UUID) -> str:
+    return f'{get_menu_item_key(menu_id)}/submenus'
 
 
-def get_submenu_item_key(submenu_id: UUID) -> str:
-    return f'submenus/{submenu_id}'
+def get_submenu_item_key(menu_id: UUID, submenu_id: UUID) -> str:
+    return f'{get_submenu_list_key(menu_id)}/{submenu_id}'
 
 
-def get_dish_list_key() -> str:
-    return 'dishes'
+def get_dish_list_key(menu_id: UUID, submenu_id: UUID) -> str:
+    return f'{get_submenu_item_key(menu_id, submenu_id)}/dishes'
 
 
-def get_dish_item_key(dish_id: UUID) -> str:
-    return f'dishes/{dish_id}'
+def get_dish_item_key(menu_id: UUID, submenu_id: UUID, dish_id: UUID) -> str:
+    return f'{get_dish_list_key(menu_id, submenu_id)}/{dish_id}'
 
 
 # Clear funcs
@@ -155,13 +155,13 @@ def invalidate_menu_list() -> None:
 
 def invalidate_submenu_list(menu_id: UUID) -> None:
     print('invalidate_submenu_list')
-    RedisCache.delete(get_submenu_list_key())
+    RedisCache.delete(get_submenu_list_key(menu_id))
     invalidate_menu_item(menu_id)
 
 
 def invalidate_dish_list(menu_id: UUID, submenu_id: UUID) -> None:
     print('invalidate_dish_list')
-    RedisCache.delete(get_dish_list_key())
+    RedisCache.delete(get_dish_list_key(menu_id, submenu_id))
     invalidate_submenu_item(menu_id, submenu_id)
 
 
@@ -173,11 +173,11 @@ def invalidate_menu_item(menu_id: UUID) -> None:
 
 def invalidate_submenu_item(menu_id: UUID, submenu_id: UUID) -> None:
     print('invalidate_submenu_item')
-    RedisCache.delete(get_submenu_item_key(submenu_id))
+    RedisCache.delete(get_submenu_item_key(menu_id, submenu_id))
     invalidate_submenu_list(menu_id)
 
 
 def invalidate_dish_item(menu_id: UUID, submenu_id: UUID, dish_id: UUID) -> None:
     print('invalidate_dish_item')
-    RedisCache.delete(get_dish_item_key(dish_id))
+    RedisCache.delete(get_dish_item_key(menu_id, submenu_id, dish_id))
     invalidate_dish_list(menu_id, submenu_id)

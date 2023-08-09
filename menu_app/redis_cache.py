@@ -29,3 +29,8 @@ class RedisCache:
     @staticmethod
     def delete(key: str) -> None:
         redis.delete(key)
+
+        _, child_keys = redis.scan(0, match=key + '/*')
+
+        if len(child_keys) > 0:
+            redis.delete(*child_keys)
