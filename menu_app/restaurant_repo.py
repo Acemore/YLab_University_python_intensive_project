@@ -3,14 +3,16 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-# Этот файл работает только с моделями
-# Не импортируй схемы сюда
-from .crud import dish as dish_crud
+from .models.dish import Dish
 from .models.menu import Menu
 from .models.submenu import Submenu
-from .schemas import dish as dish_schema
+
+# Этот файл работает только с моделями
+# Не импортируй схемы сюда
+
 
 # TODO: вынести HTTPExceptions в сервис
+# TODO: delete ничего не возвращает - должно быть в сервисе
 
 # Используется общий репозиторий на все сущности,
 # потому что они образуют общий агрегат:
@@ -89,9 +91,7 @@ class RestaurantRepository:
         return submenu
 
     def delete_submenu(self, menu_id: UUID, submenu_id: UUID) -> dict[str, bool]:
-        submenu = (
-            self.db.query(Submenu).filter_by(menu_id=menu_id, id=submenu_id).first()
-        )
+        submenu = self.db.query(Submenu).filter_by(menu_id=menu_id, id=submenu_id).first()
 
         if not submenu:
             raise HTTPException(
@@ -106,22 +106,39 @@ class RestaurantRepository:
 
     # Dish
 
-    def read_dishes(self, submenu_id: UUID) -> list[dish_schema.Dish]:
-        return dish_crud.read_dishes(self.db, submenu_id)
+    def read_dishes(self, submenu_id: UUID) -> list[Dish]:
+        return self.db.query(Dish).filter_by(submenu_id=submenu_id).all()
 
-    def read_dish(self, submenu_id: UUID, dish_id: UUID) -> dish_schema.Dish:
-        return dish_crud.read_dish(self.db, submenu_id, dish_id)
+    def read_dish(self, submenu_id: UUID, dish_id: UUID) -> Dish:
+        dish = self.db.query(Dish).filter_by(submenu_id=submenu_id, id=dish_id).first()
 
-    def create_dish(self, submenu_id: UUID, dish: dish_schema.DishCreate) -> dish_schema.Dish:
-        return dish_crud.create_dish(self.db, submenu_id, dish)
+        if dish is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='dish not found',
+            )
 
-    def update_dish(
-        self,
-        submenu_id: UUID,
-        dish_id: UUID,
-        dish: dish_schema.DishUpdate,
-    ) -> dish_schema.Dish:
-        return dish_crud.update_dish(self.db, submenu_id, dish_id, dish)
+        return dish
+
+    def save_dish(self, dish: Dish, is_new: bool) -> Dish:
+        if is_new:
+            self.db.add(dish)
+
+        self.db.commit()
+        self.db.refresh(dish)
+
+        return dish
 
     def delete_dish(self, submenu_id: UUID, dish_id: UUID) -> dict[str, bool]:
-        return dish_crud.delete_dish(self.db, submenu_id, dish_id)
+        dish = self.db.query(Dish).filter_by(submenu_id=submenu_id, id=dish_id).first()
+
+        if not dish:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='dish not found',
+            )
+
+        self.db.delete(dish)
+        self.db.commit()
+
+        return {'ok': True}

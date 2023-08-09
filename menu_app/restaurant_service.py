@@ -2,6 +2,7 @@ from uuid import UUID
 
 from pydantic import parse_obj_as
 
+from .models.dish import Dish
 from .models.menu import Menu
 from .models.submenu import Submenu
 from .redis_cache import RedisCache
@@ -86,7 +87,17 @@ class RestaurantService:
 
     def create_dish(self, menu_id: UUID, submenu_id: UUID, dish: DishCreate) -> DishSchema:
         invalidate_dish_list(menu_id, submenu_id)
-        return self.repo.create_dish(submenu_id, dish)
+
+        dish_model = Dish(
+            title=dish.title,
+            description=dish.description,
+            price=dish.price,
+            submenu_id=submenu_id,
+        )
+
+        dish_model = self.repo.save_dish(dish_model, True)
+
+        return parse_obj_as(DishSchema, dish_model)
 
     def update_submenu(
         self,
@@ -108,10 +119,17 @@ class RestaurantService:
         menu_id: UUID,
         submenu_id: UUID,
         dish_id: UUID,
-        dish: DishUpdate,
+        dish_update: DishUpdate,
     ) -> DishSchema:
         invalidate_dish_item(menu_id, submenu_id, dish_id)
-        return self.repo.update_dish(submenu_id, dish_id, dish)
+
+        dish_model = self.repo.read_dish(submenu_id, dish_id)
+        dish_model.title = dish_update.title
+        dish_model.description = dish_update.description
+        dish_model.price = dish_update.price
+        dish_model = self.repo.save_dish(dish_model, False)
+
+        return parse_obj_as(DishSchema, dish_model)
 
     def delete_submenu(self, menu_id: UUID, submenu_id: UUID) -> dict[str, bool]:
         invalidate_submenu_item(menu_id, submenu_id)
