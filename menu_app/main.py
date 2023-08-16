@@ -151,7 +151,7 @@ def delete_dish(
 
 
 @app.get('/api/v1/menu_content')
-def read_menu_content(db: Session = Depends(get_db)):  # TODO: add output type
+def export(db: Session = Depends(get_db)):  # TODO: add output type
     from sqlalchemy.sql import text
 
     statement = text('SELECT * FROM menus JOIN submenus ON menus.id = submenus.menu_id JOIN dishes ON submenus.id = \
