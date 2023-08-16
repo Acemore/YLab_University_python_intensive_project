@@ -1,4 +1,5 @@
 import os
+from uuid import UUID
 
 import requests
 from menu_app.database import engine
@@ -9,7 +10,7 @@ menu_content_url = f'{LOCAL_URL}/api/v1/menu_content'
 
 
 def int_to_uuid(num):
-    return str(num).rjust(32, '0')
+    return UUID(str(num).rjust(32, '0'))
 
 
 def test_export() -> None:
