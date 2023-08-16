@@ -154,7 +154,6 @@ def delete_dish(
 def read_menu_content(db: Session = Depends(get_db)):  # TODO: add output type
     from sqlalchemy.sql import text
 
-    statement = text(
-        'SELECT * FROM menus JOIN submenus ON menus.id = submenus.menu_id JOIN dishes ON submenus.id = dishes.submenu_id'
-    )
+    statement = text('SELECT * FROM menus JOIN submenus ON menus.id = submenus.menu_id JOIN dishes ON submenus.id = \
+        dishes.submenu_id ORDER BY menus.id, submenus.id, dishes.id')
     return ' '.join([str(_) for _ in db.execute(statement)])
