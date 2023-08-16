@@ -148,3 +148,13 @@ def delete_dish(
     svc: RestaurantService = Depends(get_service),
 ) -> dict[str, bool]:
     return svc.delete_dish(menu_id, submenu_id, dish_id)
+
+
+@app.get('/api/v1/menu_content')
+def read_menu_content(db: Session = Depends(get_db)):  # TODO: add output type
+    from sqlalchemy.sql import text
+
+    statement = text(
+        'SELECT * FROM menus JOIN submenus ON menus.id = submenus.menu_id JOIN dishes ON submenus.id = dishes.submenu_id'
+    )
+    return ' '.join([str(_) for _ in db.execute(statement)])
