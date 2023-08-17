@@ -1,7 +1,9 @@
 from uuid import UUID
 
+import pandas
 from fastapi import Depends, FastAPI, status
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
 
 from .database import SessionLocal, engine
 from .models import dish as dish_model
@@ -151,9 +153,12 @@ def delete_dish(
 
 
 @app.get('/api/v1/menu_content')
-def export(db: Session = Depends(get_db)):  # TODO: add output type
-    from sqlalchemy.sql import text
-
+def export(db: Session = Depends(get_db)) -> str:
     statement = text('SELECT * FROM menus JOIN submenus ON menus.id = submenus.menu_id JOIN dishes ON submenus.id = \
         dishes.submenu_id ORDER BY menus.id, submenus.id, dishes.id')
-    return ' '.join([str(_) for _ in db.execute(statement)])
+    export_data = db.execute(statement)
+
+    df = pandas.DataFrame(export_data)
+    csv_data = df.to_csv()
+
+    return csv_data
