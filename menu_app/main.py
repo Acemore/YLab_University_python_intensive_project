@@ -1,6 +1,5 @@
 from uuid import UUID
 
-import pandas
 from fastapi import Depends, FastAPI, status
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
@@ -174,7 +173,10 @@ def delete_dish(
 @app.get('/api/v1/menu_content')
 def export(db: Session = Depends(get_db)) -> str:
     statement = text(
-        'SELECT *\
+        'SELECT\
+         menus.id, menus.title, menus.description,\
+         submenus.id, submenus.title, submenus.description,\
+         dishes.id, dishes.title, dishes.description, dishes.price\
          FROM menus\
          JOIN submenus\
          ON menus.id = submenus.menu_id\
@@ -182,9 +184,52 @@ def export(db: Session = Depends(get_db)) -> str:
          ON submenus.id = dishes.submenu_id\
          ORDER BY menus.id, submenus.id, dishes.id'
     )
-    export_data = db.execute(statement)
+    export_data = db.execute(statement).fetchall()
 
-    df = pandas.DataFrame(export_data)
-    csv_data = df.to_csv()
+    export_image = []
+    current_menu_id = None
+    current_submenu_id = None
 
-    return csv_data
+    for export_row in export_data:
+        menu_id, menu_title, menu_description, \
+            submenu_id, submenu_title, submenu_description, \
+            dish_id, dish_title, dish_description, dish_price = export_row
+
+        if menu_id != current_menu_id:
+            export_image.append(
+                [
+                    menu_id,
+                    menu_title,
+                    menu_description,
+                    ' ',
+                    ' ',
+                    ' ',
+                ],
+            )
+            current_menu_id = menu_id
+
+        if submenu_id != current_submenu_id:
+            export_image.append(
+                [
+                    ' ',
+                    submenu_id,
+                    submenu_title,
+                    submenu_description,
+                    ' ',
+                    ' ',
+                ],
+            )
+            current_submenu_id = submenu_id
+
+        export_image.append(
+            [
+                ' ',
+                ' ',
+                dish_id,
+                dish_title,
+                dish_description,
+                dish_price,
+            ],
+        )
+
+    return str(export_image)
