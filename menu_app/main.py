@@ -44,12 +44,19 @@ def read_menus(svc: RestaurantService = Depends(get_service)) -> list[menu_schem
 
 
 @app.get('/api/v1/menus/{menu_id}/submenus')
-def read_submenus(menu_id: UUID, svc: RestaurantService = Depends(get_service)) -> list[submenu_schema.Submenu]:
+def read_submenus(
+    menu_id: UUID,
+    svc: RestaurantService = Depends(get_service),
+) -> list[submenu_schema.Submenu]:
     return svc.read_submenus(menu_id)
 
 
 @app.get('/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes')
-def read_dishes(menu_id: UUID, submenu_id: UUID, svc: RestaurantService = Depends(get_service)) -> list[dish_schema.Dish]:
+def read_dishes(
+    menu_id: UUID,
+    submenu_id: UUID,
+    svc: RestaurantService = Depends(get_service),
+) -> list[dish_schema.Dish]:
     return svc.read_dishes(menu_id, submenu_id)
 
 
@@ -68,12 +75,20 @@ def read_submenu(
 
 
 @app.get('/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}')
-def read_dish(menu_id: UUID, submenu_id: UUID, dish_id: UUID, svc: RestaurantService = Depends(get_service)) -> dish_schema.Dish:
+def read_dish(
+    menu_id: UUID,
+    submenu_id: UUID,
+    dish_id: UUID,
+    svc: RestaurantService = Depends(get_service),
+) -> dish_schema.Dish:
     return svc.read_dish(menu_id, submenu_id, dish_id)
 
 
 @app.post('/api/v1/menus', status_code=status.HTTP_201_CREATED)
-def create_menu(menu: menu_schema.MenuCreate, svc: RestaurantService = Depends(get_service)) -> menu_schema.Menu:
+def create_menu(
+    menu: menu_schema.MenuCreate,
+    svc: RestaurantService = Depends(get_service),
+) -> menu_schema.Menu:
     return svc.create_menu(menu)
 
 
@@ -138,7 +153,11 @@ def delete_menu(menu_id: UUID, svc: RestaurantService = Depends(get_service)) ->
 
 
 @app.delete('/api/v1/menus/{menu_id}/submenus/{submenu_id}')
-def delete_submenu(menu_id: UUID, submenu_id: UUID, svc: RestaurantService = Depends(get_service)) -> dict[str, bool]:
+def delete_submenu(
+    menu_id: UUID,
+    submenu_id: UUID,
+    svc: RestaurantService = Depends(get_service),
+) -> dict[str, bool]:
     return svc.delete_submenu(menu_id, submenu_id)
 
 
@@ -154,8 +173,15 @@ def delete_dish(
 
 @app.get('/api/v1/menu_content')
 def export(db: Session = Depends(get_db)) -> str:
-    statement = text('SELECT * FROM menus JOIN submenus ON menus.id = submenus.menu_id JOIN dishes ON submenus.id = \
-        dishes.submenu_id ORDER BY menus.id, submenus.id, dishes.id')
+    statement = text(
+        'SELECT *\
+         FROM menus\
+         JOIN submenus\
+         ON menus.id = submenus.menu_id\
+         JOIN dishes\
+         ON submenus.id = dishes.submenu_id\
+         ORDER BY menus.id, submenus.id, dishes.id'
+    )
     export_data = db.execute(statement)
 
     df = pandas.DataFrame(export_data)

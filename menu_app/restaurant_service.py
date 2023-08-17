@@ -33,7 +33,11 @@ class RestaurantService:
 
     def read_dishes(self, menu_id: UUID, submenu_id: UUID) -> list[DishSchema]:
         cache_key = get_dish_list_key(menu_id, submenu_id)
-        return RedisCache.read(cache_key, list[DishSchema], lambda: self.repo.read_dishes(submenu_id))
+        return RedisCache.read(
+            cache_key,
+            list[DishSchema],
+            lambda: self.repo.read_dishes(submenu_id),
+        )
 
     def read_menu(self, menu_id: UUID) -> MenuSchema:
         cache_key = get_menu_item_key(menu_id)
@@ -49,7 +53,11 @@ class RestaurantService:
 
     def read_dish(self, menu_id: UUID, submenu_id: UUID, dish_id: UUID) -> DishSchema:
         cache_key = get_dish_item_key(menu_id, submenu_id, dish_id)
-        return RedisCache.read(cache_key, DishSchema, lambda: self.repo.read_dish(submenu_id, dish_id))
+        return RedisCache.read(
+            cache_key,
+            DishSchema,
+            lambda: self.repo.read_dish(submenu_id, dish_id),
+        )
 
     def create_menu(self, menu: MenuCreate) -> MenuSchema:
         invalidate_menu_list()
