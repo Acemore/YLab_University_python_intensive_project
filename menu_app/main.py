@@ -1,8 +1,10 @@
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, status
+from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
+from sqlalchemy.sql.expression import TextClause
 
 from .database import SessionLocal, engine
 from .models import dish as dish_model
@@ -170,9 +172,9 @@ def delete_dish(
     return svc.delete_dish(menu_id, submenu_id, dish_id)
 
 
-@app.get('/api/v1/menu_content')
+@app.get('/api/v1/export')
 def export(db: Session = Depends(get_db)) -> str:
-    statement = text(
+    statement: TextClause = text(
         'SELECT\
          menus.id, menus.title, menus.description,\
          submenus.id, submenus.title, submenus.description,\
@@ -184,11 +186,11 @@ def export(db: Session = Depends(get_db)) -> str:
          ON submenus.id = dishes.submenu_id\
          ORDER BY menus.id, submenus.id, dishes.id'
     )
-    export_data = db.execute(statement).fetchall()
+    export_data: list[Row] = db.execute(statement).fetchall()
 
-    export_image = []
-    current_menu_id = None
-    current_submenu_id = None
+    export_rows: list[list] = []
+    current_menu_id: UUID | None = None
+    current_submenu_id: UUID | None = None
 
     for export_row in export_data:
         menu_id, menu_title, menu_description, \
@@ -196,35 +198,35 @@ def export(db: Session = Depends(get_db)) -> str:
             dish_id, dish_title, dish_description, dish_price = export_row
 
         if menu_id != current_menu_id:
-            export_image.append(
+            export_rows.append(
                 [
                     menu_id,
                     menu_title,
                     menu_description,
-                    ' ',
-                    ' ',
-                    ' ',
+                    '',
+                    '',
+                    '',
                 ],
             )
             current_menu_id = menu_id
 
         if submenu_id != current_submenu_id:
-            export_image.append(
+            export_rows.append(
                 [
-                    ' ',
+                    '',
                     submenu_id,
                     submenu_title,
                     submenu_description,
-                    ' ',
-                    ' ',
+                    '',
+                    '',
                 ],
             )
             current_submenu_id = submenu_id
 
-        export_image.append(
+        export_rows.append(
             [
-                ' ',
-                ' ',
+                '',
+                '',
                 dish_id,
                 dish_title,
                 dish_description,
@@ -232,4 +234,12 @@ def export(db: Session = Depends(get_db)) -> str:
             ],
         )
 
-    return str(export_image)
+    return lists_list_to_csv(export_rows)
+
+
+def lists_list_to_csv(lists_list: list[list]) -> str:
+    rows: map[str] = map(
+        lambda _list: '\t'.join(map(str, _list)),
+        lists_list,
+    )
+    return '\n'.join(rows)
