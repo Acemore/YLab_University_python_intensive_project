@@ -17,8 +17,9 @@ from .schemas.submenu import SubmenuCreate, SubmenuUpdate
 
 
 class RestaurantService:
-    def __init__(self, repo: RestaurantRepository) -> None:
+    def __init__(self, repo: RestaurantRepository, bg_tasks: BackgroundTasks) -> None:
         self.repo = repo
+        self.bg_tasks = bg_tasks
 
     def read_menus(self) -> list[MenuSchema]:
         cache_key = get_menu_list_key()
@@ -60,23 +61,16 @@ class RestaurantService:
             lambda: self.repo.read_dish(submenu_id, dish_id),
         )
 
-    def create_menu(self, menu: MenuCreate, bg_tasks: BackgroundTasks) -> MenuSchema:
-        bg_tasks.add_task(invalidate_menu_list)
-        # invalidate_menu_list()
+    def create_menu(self, menu: MenuCreate) -> MenuSchema:
+        self.bg_tasks.add_task(invalidate_menu_list)
 
         menu_model = Menu(title=menu.title, description=menu.description)
         menu_model = self.repo.save_menu(menu_model, True)
 
         return parse_obj_as(MenuSchema, menu_model)
 
-    def update_menu(
-            self,
-            menu_id: UUID,
-            menu_update: MenuUpdate,
-            bg_tasks: BackgroundTasks,
-    ) -> MenuSchema:
-        bg_tasks.add_task(invalidate_menu_item, menu_id)
-        # invalidate_menu_item(menu_id)
+    def update_menu(self, menu_id: UUID, menu_update: MenuUpdate) -> MenuSchema:
+        self.bg_tasks.add_task(invalidate_menu_item, menu_id)
 
         menu_model = self.repo.read_menu(menu_id)
         menu_model.title = menu_update.title
@@ -85,19 +79,12 @@ class RestaurantService:
 
         return parse_obj_as(MenuSchema, menu_model)
 
-    def delete_menu(self, menu_id: UUID, bg_tasks: BackgroundTasks) -> dict[str, bool]:
-        bg_tasks.add_task(invalidate_menu_item, menu_id)
-        # invalidate_menu_item(menu_id)
+    def delete_menu(self, menu_id: UUID) -> dict[str, bool]:
+        self.bg_tasks.add_task(invalidate_menu_item, menu_id)
         return self.repo.delete_menu(menu_id)
 
-    def create_submenu(
-        self,
-        menu_id: UUID,
-        submenu: SubmenuCreate,
-        bg_tasks: BackgroundTasks,
-    ) -> SubmenuSchema:
-        bg_tasks.add_task(invalidate_submenu_list, menu_id)
-        # invalidate_submenu_list(menu_id)
+    def create_submenu(self, menu_id: UUID, submenu: SubmenuCreate) -> SubmenuSchema:
+        self.bg_tasks.add_task(invalidate_submenu_list, menu_id)
 
         submenu_model = Submenu(
             menu_id=menu_id,
@@ -113,10 +100,8 @@ class RestaurantService:
         menu_id: UUID,
         submenu_id: UUID,
         dish: DishCreate,
-        bg_tasks: BackgroundTasks,
     ) -> DishSchema:
-        bg_tasks.add_task(invalidate_dish_list, menu_id, submenu_id)
-        # invalidate_dish_list(menu_id, submenu_id)
+        self.bg_tasks.add_task(invalidate_dish_list, menu_id, submenu_id)
 
         dish_model = Dish(
             title=dish.title,
@@ -134,10 +119,8 @@ class RestaurantService:
         menu_id: UUID,
         submenu_id: UUID,
         submenu_update: SubmenuUpdate,
-        bg_tasks: BackgroundTasks,
     ) -> SubmenuSchema:
-        bg_tasks.add_task(invalidate_submenu_item, menu_id, submenu_id)
-        # invalidate_submenu_item(menu_id, submenu_id)
+        self.bg_tasks.add_task(invalidate_submenu_item, menu_id, submenu_id)
 
         submenu_model = self.repo.read_submenu(menu_id, submenu_id)
         submenu_model.title = submenu_update.title
@@ -152,10 +135,8 @@ class RestaurantService:
         submenu_id: UUID,
         dish_id: UUID,
         dish_update: DishUpdate,
-        bg_tasks: BackgroundTasks,
     ) -> DishSchema:
-        bg_tasks.add_task(invalidate_dish_item, menu_id, submenu_id, dish_id)
-        # invalidate_dish_item(menu_id, submenu_id, dish_id)
+        self.bg_tasks.add_task(invalidate_dish_item, menu_id, submenu_id, dish_id)
 
         dish_model = self.repo.read_dish(submenu_id, dish_id)
         dish_model.title = dish_update.title
@@ -165,25 +146,12 @@ class RestaurantService:
 
         return parse_obj_as(DishSchema, dish_model)
 
-    def delete_submenu(
-        self,
-        menu_id: UUID,
-        submenu_id: UUID,
-        bg_tasks: BackgroundTasks,
-    ) -> dict[str, bool]:
-        bg_tasks.add_task(invalidate_submenu_item, menu_id, submenu_id)
-        # invalidate_submenu_item(menu_id, submenu_id)
+    def delete_submenu(self, menu_id: UUID, submenu_id: UUID) -> dict[str, bool]:
+        self.bg_tasks.add_task(invalidate_submenu_item, menu_id, submenu_id)
         return self.repo.delete_submenu(menu_id, submenu_id)
 
-    def delete_dish(
-        self,
-        menu_id: UUID,
-        submenu_id: UUID,
-        dish_id: UUID,
-        bg_tasks: BackgroundTasks,
-    ) -> dict[str, bool]:
-        bg_tasks.add_task(invalidate_dish_item, menu_id, submenu_id, dish_id)
-        # invalidate_dish_item(menu_id, submenu_id, dish_id)
+    def delete_dish(self, menu_id: UUID, submenu_id: UUID, dish_id: UUID) -> dict[str, bool]:
+        self.bg_tasks.add_task(invalidate_dish_item, menu_id, submenu_id, dish_id)
         return self.repo.delete_dish(submenu_id, dish_id)
 
 
