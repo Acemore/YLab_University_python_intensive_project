@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import Depends, FastAPI, status
+from fastapi import BackgroundTasks, Depends, FastAPI, status
 from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
@@ -88,9 +88,10 @@ def read_dish(
 @app.post('/api/v1/menus', status_code=status.HTTP_201_CREATED)
 def create_menu(
     menu: menu_schema.MenuCreate,
+    bg_tasks: BackgroundTasks,
     svc: RestaurantService = Depends(get_service),
 ) -> menu_schema.Menu:
-    return svc.create_menu(menu)
+    return svc.create_menu(menu, bg_tasks)
 
 
 @app.post(
@@ -100,9 +101,10 @@ def create_menu(
 def create_submenu(
     submenu: submenu_schema.SubmenuCreate,
     menu_id: UUID,
+    bg_tasks: BackgroundTasks,
     svc: RestaurantService = Depends(get_service),
 ) -> submenu_schema.Submenu:
-    return svc.create_submenu(menu_id, submenu)
+    return svc.create_submenu(menu_id, submenu, bg_tasks)
 
 
 @app.post(
@@ -113,18 +115,20 @@ def create_dish(
     menu_id: UUID,
     submenu_id: UUID,
     dish: dish_schema.DishCreate,
+    bg_tasks: BackgroundTasks,
     svc: RestaurantService = Depends(get_service),
 ) -> dish_schema.Dish:
-    return svc.create_dish(menu_id, submenu_id, dish)
+    return svc.create_dish(menu_id, submenu_id, dish, bg_tasks)
 
 
 @app.patch('/api/v1/menus/{menu_id}')
 def update_menu(
     menu_id: UUID,
     menu_update: menu_schema.MenuUpdate,
+    bg_tasks: BackgroundTasks,
     svc: RestaurantService = Depends(get_service),
 ) -> menu_schema.Menu:
-    return svc.update_menu(menu_id, menu_update)
+    return svc.update_menu(menu_id, menu_update, bg_tasks)
 
 
 @app.patch('/api/v1/menus/{menu_id}/submenus/{submenu_id}')
@@ -132,9 +136,10 @@ def update_submenu(
     menu_id: UUID,
     submenu_id: UUID,
     submenu_update: submenu_schema.SubmenuUpdate,
+    bg_tasks: BackgroundTasks,
     svc: RestaurantService = Depends(get_service),
 ) -> submenu_schema.Submenu:
-    return svc.update_submenu(menu_id, submenu_id, submenu_update)
+    return svc.update_submenu(menu_id, submenu_id, submenu_update, bg_tasks)
 
 
 @app.patch('/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}')
@@ -143,23 +148,29 @@ def update_dish(
     submenu_id: UUID,
     dish_id: UUID,
     dish_update: dish_schema.DishUpdate,
+    bg_tasks: BackgroundTasks,
     svc: RestaurantService = Depends(get_service),
 ) -> dish_schema.Dish:
-    return svc.update_dish(menu_id, submenu_id, dish_id, dish_update)
+    return svc.update_dish(menu_id, submenu_id, dish_id, dish_update, bg_tasks)
 
 
 @app.delete('/api/v1/menus/{menu_id}')
-def delete_menu(menu_id: UUID, svc: RestaurantService = Depends(get_service)) -> dict[str, bool]:
-    return svc.delete_menu(menu_id)
+def delete_menu(
+    menu_id: UUID,
+    bg_tasks: BackgroundTasks,
+    svc: RestaurantService = Depends(get_service),
+) -> dict[str, bool]:
+    return svc.delete_menu(menu_id, bg_tasks)
 
 
 @app.delete('/api/v1/menus/{menu_id}/submenus/{submenu_id}')
 def delete_submenu(
     menu_id: UUID,
     submenu_id: UUID,
+    bg_tasks: BackgroundTasks,
     svc: RestaurantService = Depends(get_service),
 ) -> dict[str, bool]:
-    return svc.delete_submenu(menu_id, submenu_id)
+    return svc.delete_submenu(menu_id, submenu_id, bg_tasks)
 
 
 @app.delete('/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}')
@@ -167,9 +178,10 @@ def delete_dish(
     menu_id: UUID,
     submenu_id: UUID,
     dish_id: UUID,
+    bg_tasks: BackgroundTasks,
     svc: RestaurantService = Depends(get_service),
 ) -> dict[str, bool]:
-    return svc.delete_dish(menu_id, submenu_id, dish_id)
+    return svc.delete_dish(menu_id, submenu_id, dish_id, bg_tasks)
 
 
 @app.get('/api/v1/export')
