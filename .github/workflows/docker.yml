@@ -17,4 +17,4 @@ jobs:
         run: docker compose up -d
 
       - name: Run tests
-        run: docker compose -f docker-compose-tests.yml up
+        run: docker compose -f docker-compose-tests.yml up --exit-code-from api-tests
