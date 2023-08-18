@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import BackgroundTasks, Depends, FastAPI, status
+from fastapi.responses import PlainTextResponse
 from menu_app.database import SessionLocal, engine
 from menu_app.models import dish as dish_model
 from menu_app.models import menu as menu_model
@@ -175,6 +176,6 @@ def delete_dish(
     return svc.delete_dish(menu_id, submenu_id, dish_id)
 
 
-@app.get('/api/v1/export')
+@app.get('/api/v1/export', response_class=PlainTextResponse)
 def export(db: Session = Depends(get_db)) -> str:
     return restaurant_menu_export(db)

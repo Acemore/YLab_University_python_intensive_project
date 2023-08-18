@@ -76,7 +76,7 @@ def test_export() -> None:
     insert_submenu(2, 3, 'Красные вина', 'Для романтичного вечера')
     insert_dish(3, 4, 'Шемен де Пап ля Ноблесс', 'Вино красное — фруктовое, среднетелое, выдержанное в дубе', 2700.79)
 
-    export_data = requests.get(menu_content_url).json()
+    export_data = requests.get(menu_content_url).text
     export_data = export_data.replace('\t', '|')
 
     export_rows = export_data.split('\n')
