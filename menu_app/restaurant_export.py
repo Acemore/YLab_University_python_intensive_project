@@ -1,9 +1,11 @@
 from uuid import UUID
 
+from menu_app.models.dish import Dish
+from menu_app.models.menu import Menu
+from menu_app.models.submenu import Submenu
 from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import text
-from sqlalchemy.sql.expression import TextClause
+from sqlalchemy.sql.expression import select
 
 
 def make_csv_text(lists_list: list[list]) -> str:
@@ -15,19 +17,17 @@ def make_csv_text(lists_list: list[list]) -> str:
 
 
 def restaurant_menu_export(db: Session) -> str:
-    statement: TextClause = text(
-        'SELECT\
-         menus.id, menus.title, menus.description,\
-         submenus.id, submenus.title, submenus.description,\
-         dishes.id, dishes.title, dishes.description, dishes.price\
-         FROM menus\
-         JOIN submenus\
-         ON menus.id = submenus.menu_id\
-         JOIN dishes\
-         ON submenus.id = dishes.submenu_id\
-         ORDER BY menus.id, submenus.id, dishes.id'
-    )
-    export_data: list[Row] = db.execute(statement).fetchall()
+    export_data: list[Row] = db.execute(
+        select(
+            Menu.id, Menu.title, Menu.description,
+            Submenu.id, Submenu.title, Submenu.description,
+            Dish.id, Dish.title, Dish.description, Dish.price,
+        )
+        .select_from(Menu)
+        .join(Submenu)
+        .join(Dish)
+        .order_by(Menu.id, Submenu.id, Dish.id),
+    ).fetchall()
 
     export_rows: list[list] = []
     current_menu_id: UUID | None = None
