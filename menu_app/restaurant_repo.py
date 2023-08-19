@@ -1,7 +1,8 @@
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models.dish import Dish
 from .models.menu import Menu
@@ -21,16 +22,18 @@ from .models.submenu import Submenu
 
 
 class RestaurantRepository:
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
     # Menu
 
-    def read_menus(self) -> list[Menu]:
-        return self.db.query(Menu).all()
+    async def read_menus(self) -> list[Menu]:
+        result = await self.db.execute(select(Menu))
+        return result.scalars().all()
 
-    def read_menu(self, menu_id: UUID) -> Menu:
-        menu = self.db.query(Menu).get(menu_id)
+    async def read_menu(self, menu_id: UUID) -> Menu:
+        result = await self.db.execute(select(Menu).where(Menu.id == menu_id))
+        menu = result.scalars().first()
 
         if menu is None:
             raise HTTPException(
@@ -40,17 +43,18 @@ class RestaurantRepository:
 
         return menu
 
-    def save_menu(self, menu: Menu, is_new: bool) -> Menu:
+    async def save_menu(self, menu: Menu, is_new: bool) -> Menu:
         if is_new:
             self.db.add(menu)
 
-        self.db.commit()
-        self.db.refresh(menu)
+        await self.db.commit()
+        await self.db.refresh(menu)
 
         return menu
 
-    def delete_menu(self, menu_id: UUID) -> dict[str, bool]:
-        menu = self.db.query(Menu).get(menu_id)
+    async def delete_menu(self, menu_id: UUID) -> dict[str, bool]:
+        result = await self.db.execute(select(Menu).where(Menu.id == menu_id))
+        menu = result.scalars().first()
 
         if not menu:
             raise HTTPException(
@@ -58,20 +62,23 @@ class RestaurantRepository:
                 detail='menu not found',
             )
 
-        self.db.delete(menu)
-        self.db.commit()
+        await self.db.delete(menu)
+        await self.db.commit()
 
         return {'ok': True}
 
     # Submenu
 
-    def read_submenus(self, menu_id: UUID) -> list[Submenu]:
-        return self.db.query(Submenu).filter_by(menu_id=menu_id).all()
+    async def read_submenus(self, menu_id: UUID) -> list[Submenu]:
+        result = await self.db.execute(select(Submenu).where(Menu.id == menu_id))
+        return result.scalars().all()
 
-    def read_submenu(self, menu_id: UUID, submenu_id: UUID) -> Submenu:
-        submenu = (
-            self.db.query(Submenu).filter_by(menu_id=menu_id, id=submenu_id).first()
+    async def read_submenu(self, menu_id: UUID, submenu_id: UUID) -> Submenu:
+        result = await self.db.execute(
+            select(Submenu).
+            where(Menu.id == menu_id, Submenu.id == submenu_id),
         )
+        submenu = result.scalars().first()
 
         if submenu is None:
             raise HTTPException(
@@ -81,17 +88,25 @@ class RestaurantRepository:
 
         return submenu
 
-    def save_submenu(self, submenu: Submenu, is_new: bool) -> Submenu:
+    async def save_submenu(self, submenu: Submenu, is_new: bool) -> Submenu:
         if is_new:
             self.db.add(submenu)
 
-        self.db.commit()
-        self.db.refresh(submenu)
+        await self.db.commit()
+        await self.db.refresh(submenu)
 
         return submenu
 
-    def delete_submenu(self, menu_id: UUID, submenu_id: UUID) -> dict[str, bool]:
-        submenu = self.db.query(Submenu).filter_by(menu_id=menu_id, id=submenu_id).first()
+    async def delete_submenu(
+        self,
+        menu_id: UUID,
+        submenu_id: UUID,
+    ) -> dict[str, bool]:
+        result = await self.db.execute(
+            select(Submenu).
+            where(Menu.id == menu_id, Submenu.id == submenu_id),
+        )
+        submenu = result.scalars().first()
 
         if not submenu:
             raise HTTPException(
@@ -99,18 +114,26 @@ class RestaurantRepository:
                 detail='submenu not found',
             )
 
-        self.db.delete(submenu)
-        self.db.commit()
+        await self.db.delete(submenu)
+        await self.db.commit()
 
         return {'ok': True}
 
     # Dish
 
-    def read_dishes(self, submenu_id: UUID) -> list[Dish]:
-        return self.db.query(Dish).filter_by(submenu_id=submenu_id).all()
+    async def read_dishes(self, submenu_id: UUID) -> list[Dish]:
+        result = await self.db.execute(
+            select(Dish).
+            where(Submenu.id == submenu_id),
+        )
+        return result.scalars().all()
 
-    def read_dish(self, submenu_id: UUID, dish_id: UUID) -> Dish:
-        dish = self.db.query(Dish).filter_by(submenu_id=submenu_id, id=dish_id).first()
+    async def read_dish(self, submenu_id: UUID, dish_id: UUID) -> Dish:
+        result = await self.db.execute(
+            select(Dish).
+            where(Submenu.id == submenu_id, Dish.id == dish_id),
+        )
+        dish = result.scalars().first()
 
         if dish is None:
             raise HTTPException(
@@ -120,17 +143,25 @@ class RestaurantRepository:
 
         return dish
 
-    def save_dish(self, dish: Dish, is_new: bool) -> Dish:
+    async def save_dish(self, dish: Dish, is_new: bool) -> Dish:
         if is_new:
             self.db.add(dish)
 
-        self.db.commit()
-        self.db.refresh(dish)
+        await self.db.commit()
+        await self.db.refresh(dish)
 
         return dish
 
-    def delete_dish(self, submenu_id: UUID, dish_id: UUID) -> dict[str, bool]:
-        dish = self.db.query(Dish).filter_by(submenu_id=submenu_id, id=dish_id).first()
+    async def delete_dish(
+        self,
+        submenu_id: UUID,
+        dish_id: UUID,
+    ) -> dict[str, bool]:
+        result = await self.db.execute(
+            select(Dish).
+            where(Submenu.id == submenu_id, Dish.id == dish_id),
+        )
+        dish = result.scalars().first()
 
         if not dish:
             raise HTTPException(
@@ -138,7 +169,7 @@ class RestaurantRepository:
                 detail='dish not found',
             )
 
-        self.db.delete(dish)
-        self.db.commit()
+        await self.db.delete(dish)
+        await self.db.commit()
 
         return {'ok': True}

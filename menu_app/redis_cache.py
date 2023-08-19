@@ -12,11 +12,11 @@ redis: Redis = Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
 
 class RedisCache:
     @staticmethod
-    def read(key, schema_class, model_loader) -> Any:
+    async def read(key, schema_class, model_loader) -> Any:
         if not redis.exists(key):
             print(f'Cache miss. Key: {key}')
 
-            data_for_dump = parse_obj_as(schema_class, model_loader())
+            data_for_dump = parse_obj_as(schema_class, await model_loader())
 
             redis.set(key, json.dumps(data_for_dump, default=pydantic_encoder))
         else:

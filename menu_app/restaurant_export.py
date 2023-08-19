@@ -3,9 +3,11 @@ from uuid import UUID
 from menu_app.models.dish import Dish
 from menu_app.models.menu import Menu
 from menu_app.models.submenu import Submenu
+from sqlalchemy import select
 from sqlalchemy.engine.row import Row
-from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+# from sqlalchemy.orm import Session
 
 
 def make_csv_text(lists_list: list[list]) -> str:
@@ -16,8 +18,8 @@ def make_csv_text(lists_list: list[list]) -> str:
     return '\n'.join(rows)
 
 
-def restaurant_menu_export(db: Session) -> str:
-    export_data: list[Row] = db.execute(
+async def restaurant_menu_export(db: AsyncSession) -> str:
+    result = await db.execute(
         select(
             Menu.id, Menu.title, Menu.description,
             Submenu.id, Submenu.title, Submenu.description,
@@ -27,7 +29,8 @@ def restaurant_menu_export(db: Session) -> str:
         .join(Submenu)
         .join(Dish)
         .order_by(Menu.id, Submenu.id, Dish.id),
-    ).fetchall()
+    )
+    export_data: list[Row] = result.all()
 
     export_rows: list[list] = []
     current_menu_id: UUID | None = None
