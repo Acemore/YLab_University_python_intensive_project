@@ -1,11 +1,10 @@
 import uuid
 
+from menu_app.database import Base
+from menu_app.models.dish import Dish
 from sqlalchemy import Column, ForeignKey, String, func, select
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import column_property, relationship
-
-from ..database import Base
-from .dish import Dish
 
 
 class Submenu(Base):

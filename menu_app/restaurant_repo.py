@@ -1,11 +1,10 @@
 from uuid import UUID
 
+from menu_app.models.dish import Dish
+from menu_app.models.menu import Menu
+from menu_app.models.submenu import Submenu
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from .models.dish import Dish
-from .models.menu import Menu
-from .models.submenu import Submenu
 
 # Этот файл работает только с моделями
 # Не импортируй схемы сюда

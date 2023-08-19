@@ -1,19 +1,18 @@
 from uuid import UUID
 
 from fastapi import BackgroundTasks, HTTPException, status
+from menu_app.models.dish import Dish
+from menu_app.models.menu import Menu
+from menu_app.models.submenu import Submenu
+from menu_app.redis_cache import RedisCache
+from menu_app.restaurant_repo import RestaurantRepository
+from menu_app.schemas.dish import Dish as DishSchema
+from menu_app.schemas.dish import DishCreate, DishUpdate
+from menu_app.schemas.menu import Menu as MenuSchema
+from menu_app.schemas.menu import MenuCreate, MenuUpdate
+from menu_app.schemas.submenu import Submenu as SubmenuSchema
+from menu_app.schemas.submenu import SubmenuCreate, SubmenuUpdate
 from pydantic import ValidationError, parse_obj_as
-
-from .models.dish import Dish
-from .models.menu import Menu
-from .models.submenu import Submenu
-from .redis_cache import RedisCache
-from .restaurant_repo import RestaurantRepository
-from .schemas.dish import Dish as DishSchema
-from .schemas.dish import DishCreate, DishUpdate
-from .schemas.menu import Menu as MenuSchema
-from .schemas.menu import MenuCreate, MenuUpdate
-from .schemas.submenu import Submenu as SubmenuSchema
-from .schemas.submenu import SubmenuCreate, SubmenuUpdate
 
 
 def make_not_found_error(model_name: str) -> HTTPException:
