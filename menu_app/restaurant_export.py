@@ -7,8 +7,6 @@ from sqlalchemy import select
 from sqlalchemy.engine.row import Row
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# from sqlalchemy.orm import Session
-
 
 def make_csv_text(lists_list: list[list]) -> str:
     rows: map[str] = map(

@@ -2,25 +2,14 @@ from uuid import UUID
 
 from fastapi import BackgroundTasks, Depends, FastAPI, status
 from fastapi.responses import PlainTextResponse
-from menu_app.database import get_db, init_models  # , engine
-
-# from menu_app.models import dish as dish_model
-# from menu_app.models import menu as menu_model
-# from menu_app.models import submenu as submenu_model
+from menu_app.database import get_db, init_models
 from menu_app.restaurant_export import restaurant_menu_export
 from menu_app.restaurant_repo import RestaurantRepository
 from menu_app.restaurant_service import RestaurantService
 from menu_app.schemas import dish as dish_schema
 from menu_app.schemas import menu as menu_schema
 from menu_app.schemas import submenu as submenu_schema
-
-# from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
-
-# init_models()
-# dish_model.Base.metadata.create_all(engine)
-# menu_model.Base.metadata.create_all(engine)
-# submenu_model.Base.metadata.create_all(engine)
 
 app: FastAPI = FastAPI()
 
@@ -28,14 +17,6 @@ app: FastAPI = FastAPI()
 @app.on_event('startup')
 async def on_startup() -> None:
     await init_models()
-
-
-# def get_db() -> Session:
-#     db = async_session()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
 
 
 def get_repo(db: AsyncSession = Depends(get_db)) -> RestaurantRepository:

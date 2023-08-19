@@ -3,7 +3,7 @@ from uuid import UUID
 
 import pytest
 import requests
-from menu_app.database import async_session  # engine
+from menu_app.database import async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import text
 

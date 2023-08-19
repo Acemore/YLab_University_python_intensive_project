@@ -1,8 +1,6 @@
 import os
 
 import dotenv
-
-# from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -11,12 +9,12 @@ dotenv.load_dotenv()
 
 SQLALCHEMY_DATABASE_URL = os.getenv('SQLALCHEMY_DATABASE_URL')
 
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)  # create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 async_session = sessionmaker(
     engine,
     class_=AsyncSession,
     expire_on_commit=False,
-)  # autocommit=False, autoflush=False, bind=engine)
+)
 
 Base = declarative_base()
 
