@@ -218,36 +218,36 @@ def get_dish_item_key(menu_id: UUID, submenu_id: UUID, dish_id: UUID) -> str:
 
 # Clear funcs
 
-def invalidate_menu_list() -> None:
+async def invalidate_menu_list() -> None:
     print('invalidate_menu_list')
-    RedisCache.delete(get_menu_list_key())
+    await RedisCache.delete(get_menu_list_key())
 
 
-def invalidate_submenu_list(menu_id: UUID) -> None:
+async def invalidate_submenu_list(menu_id: UUID) -> None:
     print('invalidate_submenu_list')
-    RedisCache.delete(get_submenu_list_key(menu_id))
-    invalidate_menu_item(menu_id)
+    await RedisCache.delete(get_submenu_list_key(menu_id))
+    await invalidate_menu_item(menu_id)
 
 
-def invalidate_dish_list(menu_id: UUID, submenu_id: UUID) -> None:
+async def invalidate_dish_list(menu_id: UUID, submenu_id: UUID) -> None:
     print('invalidate_dish_list')
-    RedisCache.delete(get_dish_list_key(menu_id, submenu_id))
-    invalidate_submenu_item(menu_id, submenu_id)
+    await RedisCache.delete(get_dish_list_key(menu_id, submenu_id))
+    await invalidate_submenu_item(menu_id, submenu_id)
 
 
-def invalidate_menu_item(menu_id: UUID) -> None:
+async def invalidate_menu_item(menu_id: UUID) -> None:
     print('invalidate_menu_item')
-    RedisCache.delete(get_menu_item_key(menu_id))
-    invalidate_menu_list()
+    await RedisCache.delete(get_menu_item_key(menu_id))
+    await invalidate_menu_list()
 
 
-def invalidate_submenu_item(menu_id: UUID, submenu_id: UUID) -> None:
+async def invalidate_submenu_item(menu_id: UUID, submenu_id: UUID) -> None:
     print('invalidate_submenu_item')
-    RedisCache.delete(get_submenu_item_key(menu_id, submenu_id))
-    invalidate_submenu_list(menu_id)
+    await RedisCache.delete(get_submenu_item_key(menu_id, submenu_id))
+    await invalidate_submenu_list(menu_id)
 
 
-def invalidate_dish_item(menu_id: UUID, submenu_id: UUID, dish_id: UUID) -> None:
+async def invalidate_dish_item(menu_id: UUID, submenu_id: UUID, dish_id: UUID) -> None:
     print('invalidate_dish_item')
-    RedisCache.delete(get_dish_item_key(menu_id, submenu_id, dish_id))
-    invalidate_dish_list(menu_id, submenu_id)
+    await RedisCache.delete(get_dish_item_key(menu_id, submenu_id, dish_id))
+    await invalidate_dish_list(menu_id, submenu_id)
