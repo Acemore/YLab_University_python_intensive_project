@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from fastapi import BackgroundTasks
-from pydantic import parse_obj_as
+from fastapi import BackgroundTasks, HTTPException, status
+from pydantic import ValidationError, parse_obj_as
 
 from .models.dish import Dish
 from .models.menu import Menu
@@ -14,6 +14,13 @@ from .schemas.menu import Menu as MenuSchema
 from .schemas.menu import MenuCreate, MenuUpdate
 from .schemas.submenu import Submenu as SubmenuSchema
 from .schemas.submenu import SubmenuCreate, SubmenuUpdate
+
+
+def make_not_found_error(model_name: str) -> HTTPException:
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f'{model_name} not found',
+    )
 
 
 class RestaurantService:
@@ -51,11 +58,17 @@ class RestaurantService:
 
     async def read_menu(self, menu_id: UUID) -> MenuSchema:
         cache_key = get_menu_item_key(menu_id)
-        return await RedisCache.read(
-            cache_key,
-            MenuSchema,
-            lambda: self.repo.read_menu(menu_id),
-        )
+
+        try:
+            result = await RedisCache.read(
+                cache_key,
+                MenuSchema,
+                lambda: self.repo.read_menu(menu_id),
+            )
+        except ValidationError:
+            make_not_found_error('menu')
+
+        return result
 
     async def read_submenu(
         self,
@@ -63,11 +76,17 @@ class RestaurantService:
         submenu_id: UUID,
     ) -> SubmenuSchema:
         cache_key = get_submenu_item_key(menu_id, submenu_id)
-        return await RedisCache.read(
-            cache_key,
-            SubmenuSchema,
-            lambda: self.repo.read_submenu(menu_id, submenu_id),
-        )
+
+        try:
+            result = await RedisCache.read(
+                cache_key,
+                SubmenuSchema,
+                lambda: self.repo.read_submenu(menu_id, submenu_id),
+            )
+        except ValidationError:
+            make_not_found_error('submenu')
+
+        return result
 
     async def read_dish(
         self,
@@ -76,11 +95,17 @@ class RestaurantService:
         dish_id: UUID,
     ) -> DishSchema:
         cache_key = get_dish_item_key(menu_id, submenu_id, dish_id)
-        return await RedisCache.read(
-            cache_key,
-            DishSchema,
-            lambda: self.repo.read_dish(submenu_id, dish_id),
-        )
+
+        try:
+            result = await RedisCache.read(
+                cache_key,
+                DishSchema,
+                lambda: self.repo.read_dish(submenu_id, dish_id),
+            )
+        except ValidationError:
+            make_not_found_error('dish')
+
+        return result
 
     async def create_menu(self, menu: MenuCreate) -> MenuSchema:
         self.bg_tasks.add_task(invalidate_menu_list)
@@ -106,7 +131,13 @@ class RestaurantService:
 
     async def delete_menu(self, menu_id: UUID) -> dict[str, bool]:
         self.bg_tasks.add_task(invalidate_menu_item, menu_id)
-        return await self.repo.delete_menu(menu_id)
+
+        try:
+            await self.repo.delete_menu(menu_id)
+        except HTTPException:
+            make_not_found_error('menu')
+
+        return {'ok': True}
 
     async def create_submenu(
         self,
@@ -180,7 +211,13 @@ class RestaurantService:
         submenu_id: UUID,
     ) -> dict[str, bool]:
         self.bg_tasks.add_task(invalidate_submenu_item, menu_id, submenu_id)
-        return await self.repo.delete_submenu(menu_id, submenu_id)
+
+        try:
+            await self.repo.delete_submenu(menu_id, submenu_id)
+        except HTTPException:
+            make_not_found_error('submenu')
+
+        return {'ok': True}
 
     async def delete_dish(
         self,
@@ -189,7 +226,13 @@ class RestaurantService:
         dish_id: UUID,
     ) -> dict[str, bool]:
         self.bg_tasks.add_task(invalidate_dish_item, menu_id, submenu_id, dish_id)
-        return await self.repo.delete_dish(submenu_id, dish_id)
+
+        try:
+            await self.repo.delete_dish(submenu_id, dish_id)
+        except HTTPException:
+            make_not_found_error('dish')
+
+        return {'ok': True}
 
 
 def get_menu_list_key() -> str:

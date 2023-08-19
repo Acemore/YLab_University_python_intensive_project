@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,10 +9,6 @@ from .models.submenu import Submenu
 
 # Этот файл работает только с моделями
 # Не импортируй схемы сюда
-
-
-# TODO: вынести HTTPExceptions в сервис
-# TODO: delete ничего не возвращает - должно быть в сервисе
 
 # Используется общий репозиторий на все сущности,
 # потому что они образуют общий агрегат:
@@ -35,12 +30,6 @@ class RestaurantRepository:
         result = await self.db.execute(select(Menu).where(Menu.id == menu_id))
         menu = result.scalars().first()
 
-        if menu is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='menu not found',
-            )
-
         return menu
 
     async def save_menu(self, menu: Menu, is_new: bool) -> Menu:
@@ -52,20 +41,14 @@ class RestaurantRepository:
 
         return menu
 
-    async def delete_menu(self, menu_id: UUID) -> dict[str, bool]:
+    async def delete_menu(self, menu_id: UUID) -> None:
         result = await self.db.execute(select(Menu).where(Menu.id == menu_id))
         menu = result.scalars().first()
-
-        if not menu:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='menu not found',
-            )
 
         await self.db.delete(menu)
         await self.db.commit()
 
-        return {'ok': True}
+        return None
 
     # Submenu
 
@@ -79,12 +62,6 @@ class RestaurantRepository:
             where(Menu.id == menu_id, Submenu.id == submenu_id),
         )
         submenu = result.scalars().first()
-
-        if submenu is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='submenu not found',
-            )
 
         return submenu
 
@@ -101,23 +78,17 @@ class RestaurantRepository:
         self,
         menu_id: UUID,
         submenu_id: UUID,
-    ) -> dict[str, bool]:
+    ) -> None:
         result = await self.db.execute(
             select(Submenu).
             where(Menu.id == menu_id, Submenu.id == submenu_id),
         )
         submenu = result.scalars().first()
 
-        if not submenu:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='submenu not found',
-            )
-
         await self.db.delete(submenu)
         await self.db.commit()
 
-        return {'ok': True}
+        return None
 
     # Dish
 
@@ -135,12 +106,6 @@ class RestaurantRepository:
         )
         dish = result.scalars().first()
 
-        if dish is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='dish not found',
-            )
-
         return dish
 
     async def save_dish(self, dish: Dish, is_new: bool) -> Dish:
@@ -156,20 +121,14 @@ class RestaurantRepository:
         self,
         submenu_id: UUID,
         dish_id: UUID,
-    ) -> dict[str, bool]:
+    ) -> None:
         result = await self.db.execute(
             select(Dish).
             where(Submenu.id == submenu_id, Dish.id == dish_id),
         )
         dish = result.scalars().first()
 
-        if not dish:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='dish not found',
-            )
-
         await self.db.delete(dish)
         await self.db.commit()
 
-        return {'ok': True}
+        return None
