@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      - LOCAL_URL=http://api:8000
-      - SQLALCHEMY_DATABASE_URL=postgresql+asyncpg://menu_app:menu_app@db:5432/menu_app
+    env_file:
+      - docker-compose.env
     command: [ "/bin/bash", "-c", "poetry run pytest menu_app_tests/*"]
