@@ -22,6 +22,6 @@ services:
       dockerfile: Dockerfile
     environment:
       - REDIS_HOST=redis
-      - SQLALCHEMY_DATABASE_URL=postgresql://menu_app:menu_app@db:5432/menu_app
+      - SQLALCHEMY_DATABASE_URL=postgresql+asyncpg://menu_app:menu_app@db:5432/menu_app
     ports:
       - 8000:8000
