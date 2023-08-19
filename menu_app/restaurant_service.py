@@ -28,32 +28,14 @@ class RestaurantService:
         self.repo = repo
         self.bg_tasks = bg_tasks
 
+    # Menu
+
     async def read_menus(self) -> list[MenuSchema]:
         cache_key = get_menu_list_key()
         return await RedisCache.read(
             cache_key,
             list[MenuSchema],
             lambda: self.repo.read_menus(),
-        )
-
-    async def read_submenus(self, menu_id: UUID) -> list[SubmenuSchema]:
-        cache_key = get_submenu_list_key(menu_id)
-        return await RedisCache.read(
-            cache_key,
-            list[SubmenuSchema],
-            lambda: self.repo.read_submenus(menu_id),
-        )
-
-    async def read_dishes(
-        self,
-        menu_id: UUID,
-        submenu_id: UUID,
-    ) -> list[DishSchema]:
-        cache_key = get_dish_list_key(menu_id, submenu_id)
-        return await RedisCache.read(
-            cache_key,
-            list[DishSchema],
-            lambda: self.repo.read_dishes(submenu_id),
         )
 
     async def read_menu(self, menu_id: UUID) -> MenuSchema:
@@ -67,43 +49,6 @@ class RestaurantService:
             )
         except ValidationError:
             make_not_found_error('menu')
-
-        return result
-
-    async def read_submenu(
-        self,
-        menu_id: UUID,
-        submenu_id: UUID,
-    ) -> SubmenuSchema:
-        cache_key = get_submenu_item_key(menu_id, submenu_id)
-
-        try:
-            result = await RedisCache.read(
-                cache_key,
-                SubmenuSchema,
-                lambda: self.repo.read_submenu(menu_id, submenu_id),
-            )
-        except ValidationError:
-            make_not_found_error('submenu')
-
-        return result
-
-    async def read_dish(
-        self,
-        menu_id: UUID,
-        submenu_id: UUID,
-        dish_id: UUID,
-    ) -> DishSchema:
-        cache_key = get_dish_item_key(menu_id, submenu_id, dish_id)
-
-        try:
-            result = await RedisCache.read(
-                cache_key,
-                DishSchema,
-                lambda: self.repo.read_dish(submenu_id, dish_id),
-            )
-        except ValidationError:
-            make_not_found_error('dish')
 
         return result
 
@@ -139,6 +84,34 @@ class RestaurantService:
 
         return {'ok': True}
 
+    # Submenu
+
+    async def read_submenus(self, menu_id: UUID) -> list[SubmenuSchema]:
+        cache_key = get_submenu_list_key(menu_id)
+        return await RedisCache.read(
+            cache_key,
+            list[SubmenuSchema],
+            lambda: self.repo.read_submenus(menu_id),
+        )
+
+    async def read_submenu(
+        self,
+        menu_id: UUID,
+        submenu_id: UUID,
+    ) -> SubmenuSchema:
+        cache_key = get_submenu_item_key(menu_id, submenu_id)
+
+        try:
+            result = await RedisCache.read(
+                cache_key,
+                SubmenuSchema,
+                lambda: self.repo.read_submenu(menu_id, submenu_id),
+            )
+        except ValidationError:
+            make_not_found_error('submenu')
+
+        return result
+
     async def create_submenu(
         self,
         menu_id: UUID,
@@ -154,6 +127,68 @@ class RestaurantService:
         submenu_model = await self.repo.save_submenu(submenu_model, True)
 
         return parse_obj_as(SubmenuSchema, submenu_model)
+
+    async def update_submenu(
+        self,
+        menu_id: UUID,
+        submenu_id: UUID,
+        submenu_update: SubmenuUpdate,
+    ) -> SubmenuSchema:
+        self.bg_tasks.add_task(invalidate_submenu_item, menu_id, submenu_id)
+
+        submenu_model = await self.repo.read_submenu(menu_id, submenu_id)
+        submenu_model.title = submenu_update.title
+        submenu_model.description = submenu_update.description
+        submenu_model = await self.repo.save_submenu(submenu_model, False)
+
+        return parse_obj_as(SubmenuSchema, submenu_model)
+
+    async def delete_submenu(
+        self,
+        menu_id: UUID,
+        submenu_id: UUID,
+    ) -> dict[str, bool]:
+        self.bg_tasks.add_task(invalidate_submenu_item, menu_id, submenu_id)
+
+        try:
+            await self.repo.delete_submenu(menu_id, submenu_id)
+        except HTTPException:
+            make_not_found_error('submenu')
+
+        return {'ok': True}
+
+    # Dish
+
+    async def read_dishes(
+        self,
+        menu_id: UUID,
+        submenu_id: UUID,
+    ) -> list[DishSchema]:
+        cache_key = get_dish_list_key(menu_id, submenu_id)
+        return await RedisCache.read(
+            cache_key,
+            list[DishSchema],
+            lambda: self.repo.read_dishes(submenu_id),
+        )
+
+    async def read_dish(
+        self,
+        menu_id: UUID,
+        submenu_id: UUID,
+        dish_id: UUID,
+    ) -> DishSchema:
+        cache_key = get_dish_item_key(menu_id, submenu_id, dish_id)
+
+        try:
+            result = await RedisCache.read(
+                cache_key,
+                DishSchema,
+                lambda: self.repo.read_dish(submenu_id, dish_id),
+            )
+        except ValidationError:
+            make_not_found_error('dish')
+
+        return result
 
     async def create_dish(
         self,
@@ -173,21 +208,6 @@ class RestaurantService:
 
         return parse_obj_as(DishSchema, dish_model)
 
-    async def update_submenu(
-        self,
-        menu_id: UUID,
-        submenu_id: UUID,
-        submenu_update: SubmenuUpdate,
-    ) -> SubmenuSchema:
-        self.bg_tasks.add_task(invalidate_submenu_item, menu_id, submenu_id)
-
-        submenu_model = await self.repo.read_submenu(menu_id, submenu_id)
-        submenu_model.title = submenu_update.title
-        submenu_model.description = submenu_update.description
-        submenu_model = await self.repo.save_submenu(submenu_model, False)
-
-        return parse_obj_as(SubmenuSchema, submenu_model)
-
     async def update_dish(
         self,
         menu_id: UUID,
@@ -204,20 +224,6 @@ class RestaurantService:
         dish_model = await self.repo.save_dish(dish_model, False)
 
         return parse_obj_as(DishSchema, dish_model)
-
-    async def delete_submenu(
-        self,
-        menu_id: UUID,
-        submenu_id: UUID,
-    ) -> dict[str, bool]:
-        self.bg_tasks.add_task(invalidate_submenu_item, menu_id, submenu_id)
-
-        try:
-            await self.repo.delete_submenu(menu_id, submenu_id)
-        except HTTPException:
-            make_not_found_error('submenu')
-
-        return {'ok': True}
 
     async def delete_dish(
         self,
