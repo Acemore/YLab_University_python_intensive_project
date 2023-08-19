@@ -78,6 +78,8 @@ class TestExport:
         await self.insert_submenu(2, 3, 'Красные вина', 'Для романтичного вечера')
         await self.insert_dish(3, 4, 'Шемен де Пап ля Ноблесс', 'Вино красное — фруктовое, среднетелое, выдержанное в дубе', 2700.79)
 
+        await self.db.commit()
+
         export_data = requests.get(menu_content_url).text
         export_data = export_data.replace('\t', '|')
 
@@ -94,3 +96,4 @@ class TestExport:
         assert export_rows[8] == '||00000000-0000-0000-0000-000000000004|Шемен де Пап ля Ноблесс|Вино красное — фруктовое, среднетелое, выдержанное в дубе|2700.79'
 
         await self.clear_menu()
+        await self.db.commit()
