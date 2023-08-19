@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import BackgroundTasks, Depends, FastAPI, status
 from fastapi.responses import PlainTextResponse
-from menu_app.database import get_db  # , init_models, engine
+from menu_app.database import get_db, init_models  # , engine
 
 # from menu_app.models import dish as dish_model
 # from menu_app.models import menu as menu_model
@@ -23,6 +23,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # submenu_model.Base.metadata.create_all(engine)
 
 app: FastAPI = FastAPI()
+
+
+@app.on_event('startup')
+async def on_startup() -> None:
+    await init_models()
 
 
 # def get_db() -> Session:
