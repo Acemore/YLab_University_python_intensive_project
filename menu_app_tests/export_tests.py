@@ -61,6 +61,7 @@ class TestExport:
 
     async def clear_menu(self) -> None:
         await self.db.execute(text('DELETE FROM menus'))
+        await self.db.commit()
 
     @pytest.mark.asyncio
     async def test_export(self) -> None:
@@ -96,4 +97,3 @@ class TestExport:
         assert export_rows[8] == '||00000000-0000-0000-0000-000000000004|Шемен де Пап ля Ноблесс|Вино красное — фруктовое, среднетелое, выдержанное в дубе|2700.79'
 
         await self.clear_menu()
-        await self.db.commit()
