@@ -5,5 +5,5 @@ services:
       dockerfile: Dockerfile
     environment:
       - LOCAL_URL=http://api:8000
-      - SQLALCHEMY_DATABASE_URL=postgresql://menu_app:menu_app@db:5432/menu_app
+      - SQLALCHEMY_DATABASE_URL=postgresql+asyncpg://menu_app:menu_app@localhost:5432/menu_app
     command: [ "/bin/bash", "-c", "poetry run pytest menu_app_tests/*"]
