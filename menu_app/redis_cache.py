@@ -16,7 +16,12 @@ class RedisCache:
         if not await redis.exists(key):
             print(f'Cache miss. Key: {key}')
 
-            data_for_dump = parse_obj_as(schema_class, await model_loader())
+            load_result = await model_loader()
+
+            if load_result is None:
+                return None
+
+            data_for_dump = parse_obj_as(schema_class, load_result)
 
             await redis.set(key, json.dumps(data_for_dump, default=pydantic_encoder))
         else:

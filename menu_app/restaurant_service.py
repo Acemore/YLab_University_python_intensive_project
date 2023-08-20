@@ -12,11 +12,11 @@ from menu_app.schemas.menu import Menu as MenuSchema
 from menu_app.schemas.menu import MenuCreate, MenuUpdate
 from menu_app.schemas.submenu import Submenu as SubmenuSchema
 from menu_app.schemas.submenu import SubmenuCreate, SubmenuUpdate
-from pydantic import ValidationError, parse_obj_as
+from pydantic import parse_obj_as
 
 
 def make_not_found_error(model_name: str) -> HTTPException:
-    raise HTTPException(
+    return HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail=f'{model_name} not found',
     )
@@ -40,14 +40,13 @@ class RestaurantService:
     async def read_menu(self, menu_id: UUID) -> MenuSchema:
         cache_key = get_menu_item_key(menu_id)
 
-        try:
-            result = await RedisCache.read(
-                cache_key,
-                MenuSchema,
-                lambda: self.repo.read_menu(menu_id),
-            )
-        except ValidationError:
-            make_not_found_error('menu')
+        result = await RedisCache.read(
+            cache_key,
+            MenuSchema,
+            lambda: self.repo.read_menu(menu_id),
+        )
+        if not result:
+            raise make_not_found_error('menu')
 
         return result
 
@@ -79,7 +78,7 @@ class RestaurantService:
         try:
             await self.repo.delete_menu(menu_id)
         except HTTPException:
-            make_not_found_error('menu')
+            raise make_not_found_error('menu')
 
         return {'ok': True}
 
@@ -100,14 +99,13 @@ class RestaurantService:
     ) -> SubmenuSchema:
         cache_key = get_submenu_item_key(menu_id, submenu_id)
 
-        try:
-            result = await RedisCache.read(
-                cache_key,
-                SubmenuSchema,
-                lambda: self.repo.read_submenu(menu_id, submenu_id),
-            )
-        except ValidationError:
-            make_not_found_error('submenu')
+        result = await RedisCache.read(
+            cache_key,
+            SubmenuSchema,
+            lambda: self.repo.read_submenu(menu_id, submenu_id),
+        )
+        if not result:
+            raise make_not_found_error('submenu')
 
         return result
 
@@ -152,7 +150,7 @@ class RestaurantService:
         try:
             await self.repo.delete_submenu(menu_id, submenu_id)
         except HTTPException:
-            make_not_found_error('submenu')
+            raise make_not_found_error('submenu')
 
         return {'ok': True}
 
@@ -178,14 +176,13 @@ class RestaurantService:
     ) -> DishSchema:
         cache_key = get_dish_item_key(menu_id, submenu_id, dish_id)
 
-        try:
-            result = await RedisCache.read(
-                cache_key,
-                DishSchema,
-                lambda: self.repo.read_dish(submenu_id, dish_id),
-            )
-        except ValidationError:
-            make_not_found_error('dish')
+        result = await RedisCache.read(
+            cache_key,
+            DishSchema,
+            lambda: self.repo.read_dish(submenu_id, dish_id),
+        )
+        if not result:
+            raise make_not_found_error('dish')
 
         return result
 
@@ -235,7 +232,7 @@ class RestaurantService:
         try:
             await self.repo.delete_dish(submenu_id, dish_id)
         except HTTPException:
-            make_not_found_error('dish')
+            raise make_not_found_error('dish')
 
         return {'ok': True}
 
