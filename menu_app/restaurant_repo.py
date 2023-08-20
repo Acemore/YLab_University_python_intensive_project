@@ -39,8 +39,7 @@ class RestaurantRepository:
         return menu
 
     async def delete_menu(self, menu_id: UUID) -> bool:
-        result = await self.db.execute(select(Menu).where(Menu.id == menu_id))
-        menu = result.scalars().first()
+        menu = await self.read_menu(menu_id)
 
         if not menu:
             return False
@@ -77,11 +76,7 @@ class RestaurantRepository:
         menu_id: UUID,
         submenu_id: UUID,
     ) -> bool:
-        result = await self.db.execute(
-            select(Submenu).
-            where(Menu.id == menu_id, Submenu.id == submenu_id),
-        )
-        submenu = result.scalars().first()
+        submenu = await self.read_submenu(menu_id, submenu_id)
 
         if not submenu:
             return False
@@ -121,11 +116,7 @@ class RestaurantRepository:
         submenu_id: UUID,
         dish_id: UUID,
     ) -> bool:
-        result = await self.db.execute(
-            select(Dish).
-            where(Submenu.id == submenu_id, Dish.id == dish_id),
-        )
-        dish = result.scalars().first()
+        dish = await self.read_dish(submenu_id, dish_id)
 
         if not dish:
             return False
