@@ -6,6 +6,8 @@
 
 ## To run app and tests in Docker
 
+Create .env file from .env-sample
+
 Run app
 
 ```
