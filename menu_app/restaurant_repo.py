@@ -27,9 +27,7 @@ class RestaurantRepository:
 
     async def read_menu(self, menu_id: UUID) -> Menu:
         result = await self.db.execute(select(Menu).where(Menu.id == menu_id))
-        menu = result.scalars().first()
-
-        return menu
+        return result.scalars().first()
 
     async def save_menu(self, menu: Menu, is_new: bool) -> Menu:
         if is_new:
@@ -60,9 +58,7 @@ class RestaurantRepository:
             select(Submenu).
             where(Menu.id == menu_id, Submenu.id == submenu_id),
         )
-        submenu = result.scalars().first()
-
-        return submenu
+        return result.scalars().first()
 
     async def save_submenu(self, submenu: Submenu, is_new: bool) -> Submenu:
         if is_new:
@@ -103,9 +99,7 @@ class RestaurantRepository:
             select(Dish).
             where(Submenu.id == submenu_id, Dish.id == dish_id),
         )
-        dish = result.scalars().first()
-
-        return dish
+        return result.scalars().first()
 
     async def save_dish(self, dish: Dish, is_new: bool) -> Dish:
         if is_new:
