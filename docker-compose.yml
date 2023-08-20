@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:15.1-alpine
     env_file:
-      - docker-compose.env
+      - .env
 
   redis:
     image: redis:7-alpine
@@ -17,6 +17,9 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - docker-compose.env
+      - .env
+    environment:
+      - POSTGRES_HOST=db
+      - REDIS_HOST=redis
     ports:
       - 8000:8000

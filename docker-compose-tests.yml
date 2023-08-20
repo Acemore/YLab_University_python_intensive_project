@@ -4,5 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - docker-compose.env
+      - .env
+    environment:
+      - LOCAL_URL=http://api:8000
+      - POSTGRES_HOST=db
     command: [ "/bin/bash", "-c", "poetry run pytest menu_app_tests/*"]
