@@ -75,9 +75,9 @@ class RestaurantService:
     async def delete_menu(self, menu_id: UUID) -> dict[str, bool]:
         self.bg_tasks.add_task(invalidate_menu_item, menu_id)
 
-        try:
-            await self.repo.delete_menu(menu_id)
-        except HTTPException:
+        result = await self.repo.delete_menu(menu_id)
+
+        if not result:
             raise make_not_found_error('menu')
 
         return {'ok': True}
@@ -147,9 +147,9 @@ class RestaurantService:
     ) -> dict[str, bool]:
         self.bg_tasks.add_task(invalidate_submenu_item, menu_id, submenu_id)
 
-        try:
-            await self.repo.delete_submenu(menu_id, submenu_id)
-        except HTTPException:
+        result = await self.repo.delete_submenu(menu_id, submenu_id)
+
+        if not result:
             raise make_not_found_error('submenu')
 
         return {'ok': True}
@@ -229,9 +229,9 @@ class RestaurantService:
     ) -> dict[str, bool]:
         self.bg_tasks.add_task(invalidate_dish_item, menu_id, submenu_id, dish_id)
 
-        try:
-            await self.repo.delete_dish(submenu_id, dish_id)
-        except HTTPException:
+        result = await self.repo.delete_dish(submenu_id, dish_id)
+
+        if not result:
             raise make_not_found_error('dish')
 
         return {'ok': True}
